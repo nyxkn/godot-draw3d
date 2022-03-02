@@ -25,7 +25,6 @@ const CUBE_VERTICES := [
 	Vector3( -1, 1, -1 ),
 ]
 
-## Default color to use for all the drawings.
 const COLOR_DEFAULT: Color = Color.white
 
 ## Number of segments that will be used to draw a circle.
@@ -34,7 +33,10 @@ const COLOR_DEFAULT: Color = Color.white
 ##
 export(int) var circle_resolution: int = 32
 
-var current_color: Color = COLOR_DEFAULT
+## This holds the color value to use unless overridden by the specific draw functions.
+## Change this through change_color().
+var current_color: Color = COLOR_DEFAULT setget change_color
+
 var point_size: int = 5
 var line_width: int = 2 # currently unimplemented in godot
 
@@ -42,30 +44,33 @@ var m: SpatialMaterial
 
 	
 func _ready() -> void:
-	# print("ready")
-	_setup()
+	set_material()
 
 	
-func _setup() -> void:
+func set_material() -> void:
 	# material values affect everything drawn
 	# if you need different parameters, you probably need to instance a new IM with a new material
 	# i.e. we cannot change point_size on the fly for different draws,
 	# as changing the value will change all previously drawn points as well
 	m = SpatialMaterial.new()
+	
 	m.vertex_color_use_as_albedo = true
 	m.flags_use_point_size = true
+	m.flags_unshaded = true
 	change_point_size(point_size)
 	change_line_width(line_width)
+	
 	set_material_override(m)
 
 
-func _set_color(color: Color = COLOR_DEFAULT) -> void:
-	# this sets the default color for all following draws
-	# calling _set_color() resets it to COLOR_DEFAULT
+## Change default color for all subsequent draws.
+## Call this without arguments to reset to the default color.
+func change_color(color: Color = COLOR_DEFAULT) -> void:
 	current_color = color
 
-	
-func rand_color() -> Color:
+
+## Helper function that returns a random color.
+func random_color() -> Color:
 	return Color(rand_range(0,1), rand_range(0,1), rand_range(0,1))
 	
 
@@ -74,7 +79,8 @@ func points_test(clear: bool = false) -> void:
 	
 	begin(Mesh.PRIMITIVE_POINTS, null)
 	for i in 100:
-		_set_color(rand_color())
+		set_color(Color.green)
+#		_set_color(random_color())
 		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
 	end()
 
@@ -84,7 +90,7 @@ func line_test(clear: bool = false) -> void:
 	
 	begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 	for i in 50:
-		_set_color(rand_color())
+		set_color(random_color())
 		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
 	end()
 
@@ -114,17 +120,15 @@ func change_line_width(width: int) -> void:
 func draw_primitive(primitive_type: int, vertices: Array, color: Color = current_color) -> void:
 	begin(primitive_type, null)
 	for v in vertices:
-		_set_color(color)
+		set_color(color)
 		add_vertex(v)
 	end()
 
 
-func draw_primitive_colored(primitive_type: int, colored_vertices: Array,
-			color: Color = current_color) -> void:
-
+func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color: Color = current_color) -> void:
 	begin(primitive_type, null)
 	for i in colored_vertices.size():
-		_set_color(colored_vertices[i][1])
+		set_color(colored_vertices[i][1])
 		add_vertex(colored_vertices[i][0])
 	end()
 
@@ -202,8 +206,7 @@ func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = cur
 ###############################
 # ARC
 
-func get_arc(angle_from: float, angle_to: float,
-			transform: Transform = Transform.IDENTITY) -> PoolVector3Array:
+func get_arc(angle_from: float, angle_to: float, transform: Transform = Transform.IDENTITY) -> PoolVector3Array:
 	# angles in radians, obviously
 
 	var arc2 = PoolVector2Array()
@@ -242,9 +245,7 @@ func get_arc(angle_from: float, angle_to: float,
 ## Optionally also draw the origin point and connect it with two lines on each end
 ## (a circular sector).
 ##
-func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float,
-			draw_origin: bool = false, color: Color = current_color):
-				
+func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, draw_origin: bool = false, color: Color = current_color):
 	var arc: PoolVector3Array
 	var transform = Transform(basis, position)
 	
@@ -289,8 +290,7 @@ func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void:
 ## This function returns an ImmediateGeometry node that you need to
 ## manually add to the scene with add_child.
 ##
-func create_sphere(radius: float = 1.0, color: Color = current_color,
-					lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry:
+func create_sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry:
 	# this is so that you can translate it
 	# as the add_sphere function doesn't have any parameters to define translation
 	# FIXME i'm not sure this is necessary anymore. just add_sphere?
@@ -331,9 +331,7 @@ func check_normalization(normal: Vector3) -> bool:
 ##
 ## The normal should be normalized.
 ##
-func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0,
-			color: Color = current_color) -> void:
-
+func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
 	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
@@ -345,9 +343,7 @@ func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0,
 ##
 ## The normal should be normalized.
 ##
-func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float,
-			radius: float = 1.0, draw_origin: bool = false, color: Color = current_color) -> void:
-
+func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin: bool = false, color: Color = current_color) -> void:
 	if ! check_normalization(normal): return
 	
 	var basis = basis_from_normal(normal)
@@ -394,7 +390,5 @@ func circle_XY(center: Vector3, radius: float = 1.0, color: Color = current_colo
 
 
 ## Shortcut function to draw an arc in the XY plane.
-func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0,
-			draw_origin = false, color: Color = current_color):
-
+func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color):
 	arc(center, scale_basis(radius), angle_from, angle_to, draw_origin, color)
