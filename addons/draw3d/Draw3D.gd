@@ -2,7 +2,11 @@ tool
 extends ImmediateGeometry
 
 ##
-## A small library for drawing simple shapes in 3D
+## A small library for drawing simple shapes in 3D.
+##
+## Similar to the custom drawing in 2D that is already present in Godot:
+##
+## https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html
 ##
 class_name Draw3D, "res://addons/draw3d/CanvasItem.svg"
 
@@ -21,9 +25,13 @@ const CUBE_VERTICES := [
 	Vector3( -1, 1, -1 ),
 ]
 
+## Default color to use for all the drawings.
 const COLOR_DEFAULT: Color = Color.white
 
-## Segment resolution of circles
+## Number of segments that will be used to draw a circle.
+##
+## Also applies for the resolution of arcs.
+##
 export(int) var circle_resolution: int = 32
 
 var current_color: Color = COLOR_DEFAULT
@@ -34,11 +42,11 @@ var m: SpatialMaterial
 
 	
 func _ready() -> void:
-	print("ready")
-	setup()
+	# print("ready")
+	_setup()
 
 	
-func setup() -> void:
+func _setup() -> void:
 	# material values affect everything drawn
 	# if you need different parameters, you probably need to instance a new IM with a new material
 	# i.e. we cannot change point_size on the fly for different draws,
@@ -49,7 +57,13 @@ func setup() -> void:
 	change_point_size(point_size)
 	change_line_width(line_width)
 	set_material_override(m)
-	
+
+
+func _set_color(color: Color = COLOR_DEFAULT) -> void:
+	# this sets the default color for all following draws
+	# calling _set_color() resets it to COLOR_DEFAULT
+	current_color = color
+
 	
 func rand_color() -> Color:
 	return Color(rand_range(0,1), rand_range(0,1), rand_range(0,1))
@@ -60,7 +74,7 @@ func points_test(clear: bool = false) -> void:
 	
 	begin(Mesh.PRIMITIVE_POINTS, null)
 	for i in 100:
-		set_color(rand_color())
+		_set_color(rand_color())
 		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
 	end()
 
@@ -70,33 +84,37 @@ func line_test(clear: bool = false) -> void:
 	
 	begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 	for i in 50:
-		set_color(rand_color())
+		_set_color(rand_color())
 		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
 	end()
 
 
-# this sets the default color for all following draws
-# set_color() resets it to COLOR_DEFAULT
-func set_color(color: Color = COLOR_DEFAULT) -> void:
-	current_color = color
-
-
-# this is a "change" and not a "set" because it changes the material properties,
-# which affect everything that was previously drawn
+## Change point size.
+##
+## This applies to all points currently and previously drawn.
+##
 func change_point_size(size: int) -> void:
+	# NOTE: this changes the material properties, also affecting everything that was previously drawn
 	point_size = size
 	m.params_point_size = point_size
 
 
+## Change line width.
+##
+## Currently unimplemented in Godot.
+##
 func change_line_width(width: int) -> void:
 	line_width = width
 	m.params_line_width = line_width # currently unimplemented in godot
-	
-	
+
+
+################################
+# draw_primitive
+
 func draw_primitive(primitive_type: int, vertices: Array, color: Color = current_color) -> void:
 	begin(primitive_type, null)
 	for v in vertices:
-		set_color(color)
+		_set_color(color)
 		add_vertex(v)
 	end()
 
@@ -104,34 +122,50 @@ func draw_primitive(primitive_type: int, vertices: Array, color: Color = current
 func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color: Color = current_color) -> void:
 	begin(primitive_type, null)
 	for i in colored_vertices.size():
-		set_color(colored_vertices[i][1])
+		_set_color(colored_vertices[i][1])
 		add_vertex(colored_vertices[i][0])
 	end()
 
 
+################################
 # draw_primitive shortcuts
 
-## Draw points
+## Draw points from an Array of Vector3 vertices.
 func points(vertices: Array, color: Color = current_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_POINTS, vertices, color)
 
-## Draw lines
+## Draw line segments from an Array of Vector3 vertices.
 func line(vertices: Array, color: Color = current_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_LINE_STRIP, vertices, color)
 
-## Draw lines closing the loop
+## Draw looping line segments from an Array of Vector3 vertices.
 func line_loop(vertices: Array, color: Color = current_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
 
 
+################################
 # draw_primitive_colored shortcuts
 
-## Draw colored points
+## Draw points from an Array of *colored vertices*.
+##
+## A *colored vertex* is an Array with a Vector3 vertex and a Color value:
+##
+## `[ vertex: Vector3, color: Color ]`
+##
+## This allows you to draw points with individual colors.
+##
 func points_colored(colored_vertices: Array) -> void:
 	draw_primitive_colored(Mesh.PRIMITIVE_POINTS, colored_vertices)
 
-## Draw colored lines
-func line_colored(colored_vertices: Array) -> void:	
+## Draw line segments from an Array of *colored vertices*.
+##
+## A *colored vertex* is an Array with a Vector3 vertex and a Color value:
+##
+## `[ vertex: Vector3, color: Color ]`
+##
+## This allows you to draw line segments that blend between the colors of the two surrounding vertices.
+##
+func line_colored(colored_vertices: Array) -> void:
 	draw_primitive_colored(Mesh.PRIMITIVE_LINE_STRIP, colored_vertices)
 
 
@@ -139,7 +173,10 @@ func line_colored(colored_vertices: Array) -> void:
 ################################
 # CIRCLE
 
-## Generic function to draw a circle
+## Generic function to draw a circle.
+##
+## Pass a Basis to define orientation.
+##
 func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
 	# by default, this is a circle on the XZ plane. seems to make most sense in 3d as a highlight of objects
 	
@@ -162,8 +199,9 @@ func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = cur
 ###############################
 # ARC
 
-# angles in radians, obviously
 func get_arc(angle_from: float, angle_to: float, transform: Transform = Transform.IDENTITY) -> PoolVector3Array:
+	# angles in radians, obviously
+
 	var arc2 = PoolVector2Array()
 	
 	var angle_total = angle_to - angle_from
@@ -191,10 +229,14 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 	return arc3
 
 
-## Generic function to draw an arc
-## Pass a Basis to define orientation
-## Angle_from and Angle_to are in radians
-## Optionally also draw the origin point and connect it with two lines on each end (a circular sector)
+## Generic function to draw an arc.
+##
+## Pass a Basis argument to define orientation.
+##
+## Angle_from and Angle_to are in radians.
+##
+## Optionally also draw the origin point and connect it with two lines on each end (a circular sector).
+##
 func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float,
 			draw_origin: bool = false, color: Color = current_color):
 				
@@ -217,8 +259,10 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float,
 ################################
 # CUBE - wireframe cube
 
-## Draw a cube
-## Pass a Basis argument to define orientation
+## Generic function to draw a cube.
+##
+## Pass a Basis argument to define orientation.
+##
 func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void:
 	var vertices = CUBE_VERTICES.duplicate()
 	var transform = Transform(basis, position)
@@ -235,15 +279,19 @@ func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void:
 ################################
 # SPHERE - wireframe sphere
 
-## Create a sphere shape
-## This function returns an ImmediateGeometry node that you need to manually add to the scene with add_child
-# this is so that you can translate it, as the add_sphere function doesn't have any parameters to define translation
+## Create a sphere shape.
+##
+## This function returns an ImmediateGeometry node that you need to manually add to the scene with add_child.
+##
 func create_sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry:
+	# this is so that you can translate it, as the add_sphere function doesn't have any parameters to define translation
+	# FIXME i'm not sure this is necessary anymore. just add_sphere?
+
 	var im_sphere = ImmediateGeometry.new()
 	im_sphere.set_material_override(m)
 
 	im_sphere.begin(Mesh.PRIMITIVE_LINE_STRIP, null)
-	im_sphere.set_color(color)
+	im_sphere._set_color(color)
 	im_sphere.add_sphere(lats, lons, radius, add_uv)
 	im_sphere.end()
 	
@@ -254,52 +302,61 @@ func create_sphere(radius: float = 1.0, color: Color = current_color, lats: int 
 # SHORTCUTS - from normal
 
 func basis_from_normal(normal: Vector3) -> Basis:
+	# technically don't need to normalize again since we're already checking. but just in case.
 	var Y = normal.normalized()
 	var X = Vector3(Y.y, -Y.x, 0)
 	var Z = X.cross(Y)
 	return Basis(X, Y, Z)
 
 
-## Shortcut function to draw a circle whose plane is defined by a normal
-## The normal should be normalized
-func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
-	if normal.length() > 1.0:
+func check_normalization(normal: Vector3) -> bool:
+	# the normal should be normalized
+	# we could normalize silently but it's good to double check with the user that they're sending the right data
+	if normal.is_normalized() == false:
 		print("Normal vector should be normalized. We won't draw.")
-		return
-	
+		return false
+
+	return true
+
+## Shortcut function to draw a circle whose plane is defined by a normal.
+##
+## The normal should be normalized.
+##
+func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
+	if ! check_normalization(normal): return
+
 	var basis = basis_from_normal(normal)
 	basis = basis.scaled(Vector3(radius, radius, radius))
 	circle(position, basis, color)
 
 
-## Shortcut function to draw an arc whose plane is defined by a normal
-## The normal should be normalized
+## Shortcut function to draw an arc whose plane is defined by a normal.
+##
+## The normal should be normalized.
+##
 func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, 
 			draw_origin: bool = false, color: Color = current_color) -> void:
-				
-	if normal.length() > 1.0:
-		print("Normal vector should be normalized. We won't draw.")
-		return
+
+	if ! check_normalization(normal): return
 	
 	var basis = basis_from_normal(normal)
 	basis = basis.scaled(Vector3(radius, radius, radius))
 	arc(position, basis, angle_from, angle_to, draw_origin, color)
 
 
-## Shortcut function to draw a cube whose orientation is defined by a normal
-## The normal should be normalized
+## Shortcut function to draw a cube whose orientation is defined by a normal.
+##
+## The normal should be normalized.
+##
 func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE) -> void:
-	if normal.length() > 1.0:
-		print("Normal vector should be normalized. We won't draw.")
-		return
+	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
 	basis = basis.scaled(size)
 	cube(position, basis)
 
 
-# basic upright cube with no rotation
-## Shortcut function to draw a cube in its default orientation
+## Shortcut function to draw an upright cube with no rotation.
 func cube_up(position: Vector3, size: Vector3 = Vector3.ONE) -> void:
 	var basis := Basis.IDENTITY.scaled(size)
 	cube(position, basis)
@@ -312,19 +369,19 @@ func scale_basis(scale: float) -> Basis:
 	return Basis.IDENTITY.scaled(Vector3(scale, scale, scale))
 
 
-## Shortcut function to draw a circle lying on the XZ plane
+## Shortcut function to draw a circle lying on the XZ plane.
 func circle_XZ(center: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
 	var orientation = scale_basis(radius)
 	circle(center, orientation)
 	
 
-## Shortcut function to draw a circle lying on the XY plane
+## Shortcut function to draw a circle lying on the XY plane.
 func circle_XY(center: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
 	var orientation = scale_basis(radius)
 	orientation = orientation.rotated(Vector3.RIGHT, TAU/4)
 	circle(center, orientation)
 
 
-## Shortcut function to draw a 2d arc
+## Shortcut function to draw an arc in the XY plane.
 func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color):
 	arc(center, scale_basis(radius), angle_from, angle_to, draw_origin, color)

@@ -34,21 +34,36 @@ func _ready() -> void:
 	
 func setup() -> void:
 	pass
+	
+#	var v = Vector3(1,1,1)
+#	print(v.is_normalized())
+#	print(v.normalized().is_normalized())
+	
+#	print($Canvas3D.check_normalization(v.normalized()))
+
 #	d = find_node("Draw3D")
 #	d.clear()
 #	d.line_test()
 
 
 func _process(delta: float) -> void:
+	pass
+#	return
 #	d.clear()
 
-	
-	d.circle_XZ(Vector3(0, 0, 0))
-	
+
+#	d.circle_XZ(Vector3(0, 0, 0))
+
 #	d.circle_XY(Vector3(2, 0, 0))
 #	d.circle_XZ(Vector3(4, 0, 0))
 
 	var arcs = $Arcs/Draw3D
+	arcs.clear()
 	arcs.circle(Vector3(6, 0, 0), Vector3(1, 0, 0))
-	arcs.circle_normal(Vector3(1, 0, 1), Vector3(1, 1, 1).normalized(), 2.0)
-	arcs.arc_normal(Vector3(-2, 2, 2), Vector3(1,1,1).normalized(), TAU/8, TAU/3, 1.0, false)
+	arcs.circle_normal(Vector3(1, 0, 0), Vector3(1, 1, 1).normalized(), 2.0)
+	arcs.arc_normal(Vector3(-8, 0, 0), Vector3(1,1,1).normalized(), TAU/8, TAU/3, 1.0, false)
+	arcs.arc_2d(Vector3(-4, 0, 0), -TAU/4, TAU/4)
+
+	var shapes = $Shapes/Draw3D
+	shapes.clear()
+	shapes.cube(
