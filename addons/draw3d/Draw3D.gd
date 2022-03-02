@@ -4,7 +4,7 @@ extends ImmediateGeometry
 ##
 ## A small library for drawing simple shapes in 3D.
 ##
-## Similar to the custom drawing in 2D that is already present in Godot:
+## Usage is similar to the custom drawing in 2D that is already present in Godot:
 ##
 ## https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html
 ##
