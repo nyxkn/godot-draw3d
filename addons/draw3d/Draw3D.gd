@@ -119,7 +119,9 @@ func draw_primitive(primitive_type: int, vertices: Array, color: Color = current
 	end()
 
 
-func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color: Color = current_color) -> void:
+func draw_primitive_colored(primitive_type: int, colored_vertices: Array,
+			color: Color = current_color) -> void:
+
 	begin(primitive_type, null)
 	for i in colored_vertices.size():
 		_set_color(colored_vertices[i][1])
@@ -175,10 +177,11 @@ func line_colored(colored_vertices: Array) -> void:
 
 ## Generic function to draw a circle.
 ##
-## Pass a Basis to define orientation.
+## Pass a Basis argument to define orientation.
 ##
 func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
-	# by default, this is a circle on the XZ plane. seems to make most sense in 3d as a highlight of objects
+	# by default, this is a circle on the XZ plane.
+	# this seems to make most sense in 3d as a highlight of objects
 	
 	var resolution = circle_resolution
 	var transform = Transform(basis, position)
@@ -199,7 +202,8 @@ func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = cur
 ###############################
 # ARC
 
-func get_arc(angle_from: float, angle_to: float, transform: Transform = Transform.IDENTITY) -> PoolVector3Array:
+func get_arc(angle_from: float, angle_to: float,
+			transform: Transform = Transform.IDENTITY) -> PoolVector3Array:
 	# angles in radians, obviously
 
 	var arc2 = PoolVector2Array()
@@ -235,7 +239,8 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 ##
 ## Angle_from and Angle_to are in radians.
 ##
-## Optionally also draw the origin point and connect it with two lines on each end (a circular sector).
+## Optionally also draw the origin point and connect it with two lines on each end
+## (a circular sector).
 ##
 func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float,
 			draw_origin: bool = false, color: Color = current_color):
@@ -281,10 +286,13 @@ func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void:
 
 ## Create a sphere shape.
 ##
-## This function returns an ImmediateGeometry node that you need to manually add to the scene with add_child.
+## This function returns an ImmediateGeometry node that you need to
+## manually add to the scene with add_child.
 ##
-func create_sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry:
-	# this is so that you can translate it, as the add_sphere function doesn't have any parameters to define translation
+func create_sphere(radius: float = 1.0, color: Color = current_color,
+					lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry:
+	# this is so that you can translate it
+	# as the add_sphere function doesn't have any parameters to define translation
 	# FIXME i'm not sure this is necessary anymore. just add_sphere?
 
 	var im_sphere = ImmediateGeometry.new()
@@ -311,7 +319,8 @@ func basis_from_normal(normal: Vector3) -> Basis:
 
 func check_normalization(normal: Vector3) -> bool:
 	# the normal should be normalized
-	# we could normalize silently but it's good to double check with the user that they're sending the right data
+	# we could normalize silently but it's good to double check with the user -
+	# to make sure that they're sending the right data
 	if normal.is_normalized() == false:
 		print("Normal vector should be normalized. We won't draw.")
 		return false
@@ -322,7 +331,9 @@ func check_normalization(normal: Vector3) -> bool:
 ##
 ## The normal should be normalized.
 ##
-func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
+func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0,
+			color: Color = current_color) -> void:
+
 	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
@@ -334,8 +345,8 @@ func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, colo
 ##
 ## The normal should be normalized.
 ##
-func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, 
-			draw_origin: bool = false, color: Color = current_color) -> void:
+func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float,
+			radius: float = 1.0, draw_origin: bool = false, color: Color = current_color) -> void:
 
 	if ! check_normalization(normal): return
 	
@@ -383,5 +394,7 @@ func circle_XY(center: Vector3, radius: float = 1.0, color: Color = current_colo
 
 
 ## Shortcut function to draw an arc in the XY plane.
-func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color):
+func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0,
+			draw_origin = false, color: Color = current_color):
+
 	arc(center, scale_basis(radius), angle_from, angle_to, draw_origin, color)

@@ -66,4 +66,4 @@ func _process(delta: float) -> void:
 
 	var shapes = $Shapes/Draw3D
 	shapes.clear()
-	shapes.cube(
+#	shapes.cube(
