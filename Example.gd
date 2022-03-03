@@ -14,7 +14,6 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var time = OS.get_ticks_msec() * 0.001
-	time = 0
 
 	$TransformMe.rotate_x(delta)
 	$Sphere.rotate_y(delta)

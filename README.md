@@ -2,8 +2,10 @@
 
 A small library for drawing simple shapes in 3D.
 
-Usage is similar to the [custom drawing in 2D](https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html) that is already present in Godot, and for consistency I tried to keep parameters in the same order as the 2D draw calls whenever possible.
-    
+Usage is similar to the [custom drawing in 2D](https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html)
+that is already present in Godot, and for consistency I tried to keep
+the parameters in the same order as the 2D draw calls whenever possible.
+   
 Have a look at the [documentation](docs/addons/draw3d/Draw3D.md)
 to see all the available methods and how to call them.
 
@@ -34,7 +36,7 @@ There are two ways of using this library:
 1. You can add a new Draw3D instance to every object you want to draw from.
 2. Or you can use a single instance of Draw3D as a canvas on which to draw many different shapes.
 
-Or of course a mix of either!
+Or of course a mix of either.
 
 ### Basic usage: new Draw3D instance per node
 
