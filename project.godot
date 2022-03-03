@@ -22,7 +22,7 @@ _global_script_class_icons={
 
 config/name="draw3d"
 run/main_scene="res://Example.tscn"
-config/icon="res://icon.png"
+config/icon="res://addons/draw3d/CanvasItem.svg"
 
 [editor_plugins]
 

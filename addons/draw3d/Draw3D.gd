@@ -26,6 +26,8 @@ const CUBE_VERTICES := [
 ]
 
 const COLOR_DEFAULT: Color = Color.white
+const POINT_SIZE_DEFAULT: int = 5
+const LINE_WIDTH_DEFAULT: int = 2
 
 ## Number of segments that will be used to draw a circle.
 ##
@@ -34,11 +36,13 @@ const COLOR_DEFAULT: Color = Color.white
 export(int) var circle_resolution: int = 32
 
 ## This holds the color value to use unless overridden by the specific draw functions.
-## Change this through change_color().
+##
+## Change this with change_color().
+##
 var current_color: Color = COLOR_DEFAULT setget change_color
 
-var point_size: int = 5
-var line_width: int = 2 # currently unimplemented in godot
+var point_size: int = POINT_SIZE_DEFAULT
+var line_width: int = LINE_WIDTH_DEFAULT # currently unimplemented in godot
 
 var m: SpatialMaterial
 
@@ -63,8 +67,33 @@ func set_material() -> void:
 	set_material_override(m)
 
 
+## Change point size.
+##
+## This applies to all points currently and previously drawn.
+##
+## Call without arguments to reset to the default size.
+##
+func change_point_size(size: int = POINT_SIZE_DEFAULT) -> void:
+	# NOTE: this changes the material properties, also affecting everything that was previously drawn
+	point_size = size
+	m.params_point_size = point_size
+
+
+## Change line width.
+##
+## Call without arguments to reset to the default width.
+##
+## *This is currently unimplemented in Godot and has no effect.*
+##
+func change_line_width(width: int = LINE_WIDTH_DEFAULT) -> void:
+	line_width = width
+	m.params_line_width = line_width # currently unimplemented in godot
+
+
 ## Change default color for all subsequent draws.
-## Call this without arguments to reset to the default color.
+##
+## Call without arguments to reset to the default color.
+##
 func change_color(color: Color = COLOR_DEFAULT) -> void:
 	current_color = color
 
@@ -79,8 +108,7 @@ func points_test(clear: bool = false) -> void:
 	
 	begin(Mesh.PRIMITIVE_POINTS, null)
 	for i in 100:
-		set_color(Color.green)
-#		_set_color(random_color())
+		set_color(random_color())
 		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
 	end()
 
@@ -94,24 +122,6 @@ func line_test(clear: bool = false) -> void:
 		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
 	end()
 
-
-## Change point size.
-##
-## This applies to all points currently and previously drawn.
-##
-func change_point_size(size: int) -> void:
-	# NOTE: this changes the material properties, also affecting everything that was previously drawn
-	point_size = size
-	m.params_point_size = point_size
-
-
-## Change line width.
-##
-## Currently unimplemented in Godot.
-##
-func change_line_width(width: int) -> void:
-	line_width = width
-	m.params_line_width = line_width # currently unimplemented in godot
 
 
 ################################
@@ -182,8 +192,9 @@ func line_colored(colored_vertices: Array) -> void:
 ## Generic function to draw a circle.
 ##
 ## Pass a Basis argument to define orientation.
+## Otherwise defaults to lying on the XZ plane.
 ##
-func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
+func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
 	# by default, this is a circle on the XZ plane.
 	# this seems to make most sense in 3d as a highlight of objects
 	
@@ -268,18 +279,19 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 ## Generic function to draw a cube.
 ##
 ## Pass a Basis argument to define orientation.
+## Otherwise defaults to no orientation.
 ##
-func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void:
+func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
 	var vertices = CUBE_VERTICES.duplicate()
 	var transform = Transform(basis, position)
 	
 	for i in vertices.size():
 		vertices[i] = transform.xform(vertices[i])
 	
-	line_loop(vertices.slice(0, 3))
-	line_loop(vertices.slice(4, 7))
+	line_loop(vertices.slice(0, 3), color)
+	line_loop(vertices.slice(4, 7), color)
 	for i in 4:
-		line([vertices[i], vertices[i+4]])
+		line([vertices[i], vertices[i+4]], color)
 
 
 ################################
@@ -287,24 +299,17 @@ func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void:
 
 ## Create a sphere shape.
 ##
-## This function returns an ImmediateGeometry node that you need to
-## manually add to the scene with add_child.
+## This does not take a position vector, so it will always be drawn at (0, 0, 0)
+## 
+## It's best to draw the sphere on a dedicated Draw3D node so you can manipulate it by adjusting the
+## transform properties.
 ##
-func create_sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry:
-	# this is so that you can translate it
-	# as the add_sphere function doesn't have any parameters to define translation
-	# FIXME i'm not sure this is necessary anymore. just add_sphere?
-
-	var im_sphere = ImmediateGeometry.new()
-	im_sphere.set_material_override(m)
-
-	im_sphere.begin(Mesh.PRIMITIVE_LINE_STRIP, null)
-	im_sphere._set_color(color)
-	im_sphere.add_sphere(lats, lons, radius, add_uv)
-	im_sphere.end()
+func sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
+	begin(Mesh.PRIMITIVE_LINE_STRIP, null)
+	set_color(color)
+	add_sphere(lats, lons, radius, add_uv)
+	end()
 	
-	return im_sphere
-
 
 ################################
 # SHORTCUTS - from normal
@@ -313,6 +318,9 @@ func basis_from_normal(normal: Vector3) -> Basis:
 	# technically don't need to normalize again since we're already checking. but just in case.
 	var Y = normal.normalized()
 	var X = Vector3(Y.y, -Y.x, 0)
+	# covering the edge case where our normal is (0, 0, 1)
+	if X.length_squared() == 0: X = Vector3(-1, 0, 0)
+	
 	var Z = X.cross(Y)
 	return Basis(X, Y, Z)
 
@@ -355,18 +363,18 @@ func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to:
 ##
 ## The normal should be normalized.
 ##
-func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE) -> void:
+func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE, color: Color = current_color) -> void:
 	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
 	basis = basis.scaled(size)
-	cube(position, basis)
+	cube(position, basis, color)
 
 
 ## Shortcut function to draw an upright cube with no rotation.
-func cube_up(position: Vector3, size: Vector3 = Vector3.ONE) -> void:
+func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE, color: Color = current_color) -> void:
 	var basis := Basis.IDENTITY.scaled(size)
-	cube(position, basis)
+	cube(position, basis, color)
 
 
 ################################
@@ -377,18 +385,18 @@ func scale_basis(scale: float) -> Basis:
 
 
 ## Shortcut function to draw a circle lying on the XZ plane.
-func circle_XZ(center: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
+func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void:
 	var orientation = scale_basis(radius)
-	circle(center, orientation)
+	circle(center, orientation, color)
 	
 
 ## Shortcut function to draw a circle lying on the XY plane.
-func circle_XY(center: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
+func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void:
 	var orientation = scale_basis(radius)
 	orientation = orientation.rotated(Vector3.RIGHT, TAU/4)
-	circle(center, orientation)
+	circle(center, orientation, color)
 
 
 ## Shortcut function to draw an arc in the XY plane.
-func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color):
+func arc_XY(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color):
 	arc(center, scale_basis(radius), angle_from, angle_to, draw_origin, color)

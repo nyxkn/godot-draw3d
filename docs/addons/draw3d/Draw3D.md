@@ -25,25 +25,25 @@
 
 |Name|Type|Default|
 |:-|:-|:-|
+|[change_point_size](#change_point_size)|`int`|`POINT_SIZE_DEFAULT`|
+|[change_line_width](#change_line_width)|`int`|`LINE_WIDTH_DEFAULT`|
 |[change_color](#change_color)|`Color`|`COLOR_DEFAULT`|
-|[change_point_size](#change_point_size)|`int`|-|
-|[change_line_width](#change_line_width)|`int`|-|
 |[points](#points)|`Array`|-|
 |[line](#line)|`Array`|-|
 |[line_loop](#line_loop)|`Array`|-|
 |[points_colored](#points_colored)|`Array`|-|
 |[line_colored](#line_colored)|`Array`|-|
-|[circle](#circle)|`Vector3`|-|
+|[circle](#circle)|`Vector3`|`Vector3.ZERO`|
 |[arc](#arc)|`Vector3`|-|
-|[cube](#cube)|`Vector3`|-|
-|[create_sphere](#create_sphere)|`float`|`1.0`|
+|[cube](#cube)|`Vector3`|`Vector3.ZERO`|
+|[sphere](#sphere)|`float`|`1.0`|
 |[circle_normal](#circle_normal)|`Vector3`|-|
 |[arc_normal](#arc_normal)|`Vector3`|-|
 |[cube_normal](#cube_normal)|`Vector3`|-|
-|[cube_up](#cube_up)|`Vector3`|-|
-|[circle_XZ](#circle_xz)|`Vector3`|-|
-|[circle_XY](#circle_xy)|`Vector3`|-|
-|[arc_2d](#arc_2d)|`Vector3`|-|
+|[cube_up](#cube_up)|`Vector3`|`Vector3.ZERO`|
+|[circle_XZ](#circle_xz)|`Vector3`|`Vector3.ZERO`|
+|[circle_XY](#circle_xy)|`Vector3`|`Vector3.ZERO`|
+|[arc_XY](#arc_xy)|`Vector3`|-|
 
 ## Variables
 
@@ -69,7 +69,11 @@ Number of segments that will be used to draw a circle.
 var current_color: Color = COLOR_DEFAULT setget change_color
 ```
 
-This holds the color value to use unless overridden by the specific draw functions. Change this through change_color().
+This holds the color value to use unless overridden by the specific draw functions.
+
+ Change this with change_color().
+
+
 
 |Name|Type|Default|Setter|
 |:-|:-|:-|:-|
@@ -77,13 +81,58 @@ This holds the color value to use unless overridden by the specific draw functio
 
 ## Functions
 
+### change_point_size
+
+```gdscript
+func change_point_size(size: int = POINT_SIZE_DEFAULT) -> void
+```
+
+Change point size.
+
+ This applies to all points currently and previously drawn.
+
+ Call without arguments to reset to the default size.
+
+
+
+#### Parameters
+
+|Name|Type|Default|
+|:-|:-|:-|
+|`size`|`int`|`POINT_SIZE_DEFAULT`|
+
+### change_line_width
+
+```gdscript
+func change_line_width(width: int = LINE_WIDTH_DEFAULT) -> void
+```
+
+Change line width.
+
+ Call without arguments to reset to the default width.
+
+
+*This is currently unimplemented in Godot and has no effect.*
+
+
+
+#### Parameters
+
+|Name|Type|Default|
+|:-|:-|:-|
+|`width`|`int`|`LINE_WIDTH_DEFAULT`|
+
 ### change_color
 
 ```gdscript
 func change_color(color: Color = COLOR_DEFAULT) -> void
 ```
 
-Change default color for all subsequent draws. Call this without arguments to reset to the default color.
+Change default color for all subsequent draws.
+
+ Call without arguments to reset to the default color.
+
+
 
 #### Parameters
 
@@ -100,42 +149,6 @@ func random_color() -> Color
 Helper function that returns a random color.
 
 **Returns**: `Color`
-
-### change_point_size
-
-```gdscript
-func change_point_size(size: int) -> void
-```
-
-Change point size.
-
- This applies to all points currently and previously drawn.
-
-
-
-#### Parameters
-
-|Name|Type|Default|
-|:-|:-|:-|
-|`size`|`int`|-|
-
-### change_line_width
-
-```gdscript
-func change_line_width(width: int) -> void
-```
-
-Change line width.
-
- Currently unimplemented in Godot.
-
-
-
-#### Parameters
-
-|Name|Type|Default|
-|:-|:-|:-|
-|`width`|`int`|-|
 
 ### points
 
@@ -229,12 +242,12 @@ Draw line segments from an Array of *colored vertices*.
 ### circle
 
 ```gdscript
-func circle(position: Vector3, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void
+func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void
 ```
 
 Generic function to draw a circle.
 
- Pass a Basis argument to define orientation.
+ Pass a Basis argument to define orientation. Otherwise defaults to lying on the XZ plane.
 
 
 
@@ -242,7 +255,7 @@ Generic function to draw a circle.
 
 |Name|Type|Default|
 |:-|:-|:-|
-|`position`|`Vector3`|-|
+|`position`|`Vector3`|`Vector3.ZERO`|
 |`basis`|`Basis`|`Basis.IDENTITY`|
 |`color`|`Color`|`current_color`|
 
@@ -276,12 +289,12 @@ Generic function to draw an arc.
 ### cube
 
 ```gdscript
-func cube(position: Vector3, basis: Basis = Basis.IDENTITY) -> void
+func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void
 ```
 
 Generic function to draw a cube.
 
- Pass a Basis argument to define orientation.
+ Pass a Basis argument to define orientation. Otherwise defaults to no orientation.
 
 
 
@@ -289,22 +302,23 @@ Generic function to draw a cube.
 
 |Name|Type|Default|
 |:-|:-|:-|
-|`position`|`Vector3`|-|
+|`position`|`Vector3`|`Vector3.ZERO`|
 |`basis`|`Basis`|`Basis.IDENTITY`|
+|`color`|`Color`|`current_color`|
 
-### create_sphere
+### sphere
 
 ```gdscript
-func create_sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> ImmediateGeometry
+func sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void
 ```
 
 Create a sphere shape.
 
- This function returns an ImmediateGeometry node that you need to manually add to the scene with add_child.
+ This does not take a position vector, so it will always be drawn at (0, 0, 0)
+
+ It's best to draw the sphere on a dedicated Draw3D node so you can manipulate it by adjusting the transform properties.
 
 
-
-**Returns**: `ImmediateGeometry`
 
 #### Parameters
 
@@ -364,7 +378,7 @@ Shortcut function to draw an arc whose plane is defined by a normal.
 ### cube_normal
 
 ```gdscript
-func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE) -> void
+func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE, color: Color = current_color) -> void
 ```
 
 Shortcut function to draw a cube whose orientation is defined by a normal.
@@ -380,11 +394,12 @@ Shortcut function to draw a cube whose orientation is defined by a normal.
 |`position`|`Vector3`|-|
 |`normal`|`Vector3`|-|
 |`size`|`Vector3`|`Vector3.ONE`|
+|`color`|`Color`|`current_color`|
 
 ### cube_up
 
 ```gdscript
-func cube_up(position: Vector3, size: Vector3 = Vector3.ONE) -> void
+func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE, color: Color = current_color) -> void
 ```
 
 Shortcut function to draw an upright cube with no rotation.
@@ -393,13 +408,14 @@ Shortcut function to draw an upright cube with no rotation.
 
 |Name|Type|Default|
 |:-|:-|:-|
-|`position`|`Vector3`|-|
+|`position`|`Vector3`|`Vector3.ZERO`|
 |`size`|`Vector3`|`Vector3.ONE`|
+|`color`|`Color`|`current_color`|
 
 ### circle_XZ
 
 ```gdscript
-func circle_XZ(center: Vector3, radius: float = 1.0, color: Color = current_color) -> void
+func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void
 ```
 
 Shortcut function to draw a circle lying on the XZ plane.
@@ -408,14 +424,14 @@ Shortcut function to draw a circle lying on the XZ plane.
 
 |Name|Type|Default|
 |:-|:-|:-|
-|`center`|`Vector3`|-|
+|`center`|`Vector3`|`Vector3.ZERO`|
 |`radius`|`float`|`1.0`|
 |`color`|`Color`|`current_color`|
 
 ### circle_XY
 
 ```gdscript
-func circle_XY(center: Vector3, radius: float = 1.0, color: Color = current_color) -> void
+func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void
 ```
 
 Shortcut function to draw a circle lying on the XY plane.
@@ -424,14 +440,14 @@ Shortcut function to draw a circle lying on the XY plane.
 
 |Name|Type|Default|
 |:-|:-|:-|
-|`center`|`Vector3`|-|
+|`center`|`Vector3`|`Vector3.ZERO`|
 |`radius`|`float`|`1.0`|
 |`color`|`Color`|`current_color`|
 
-### arc_2d
+### arc_XY
 
 ```gdscript
-func arc_2d(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color)
+func arc_XY(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color)
 ```
 
 Shortcut function to draw an arc in the XY plane.
