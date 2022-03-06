@@ -26,7 +26,7 @@ const CUBE_VERTICES := [
 ]
 
 const COLOR_DEFAULT: Color = Color.white
-const POINT_SIZE_DEFAULT: int = 5
+const POINT_SIZE_DEFAULT: int = 8
 const LINE_WIDTH_DEFAULT: int = 2
 
 ## Number of segments that will be used to draw a circle.

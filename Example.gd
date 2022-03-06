@@ -10,6 +10,7 @@ func _ready() -> void:
 	# single draw per Draw3D instance. easily transformable
 	$Sphere.sphere(2.0, Color.cyan)
 	$TransformMe.circle_XY()
+	$TransformMe.points([Vector3.ZERO])
 	
 
 func _process(delta: float) -> void:
@@ -47,12 +48,13 @@ func random_vertices(n: int = 20, offset: Vector3 = Vector3.ZERO) -> Array:
 	return vertices
 
 
-func random_colored_vertices(n: int = 20) -> Array:
+func random_colored_vertices(n: int = 10) -> Array:
 	var vertices = []
 	for i in n:
 		var colored_vertex = []
 		colored_vertex.resize(2)
 		colored_vertex[0] = Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1))
+		colored_vertex[0] *= 1.5
 		colored_vertex[1] = $Primitives.random_color()
 		vertices.push_back(colored_vertex)
 	return vertices
