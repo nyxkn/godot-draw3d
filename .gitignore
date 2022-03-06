@@ -13,3 +13,4 @@ export.cfg
 # project ignores
 addons/godot-plugin-refresher
 assets/temp/
+README.md.tmp

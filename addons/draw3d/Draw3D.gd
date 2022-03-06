@@ -146,15 +146,19 @@ func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color:
 ################################
 # draw_primitive shortcuts
 
-## Draw points from an Array of Vector3 vertices.
+## Draw points at the given vertices.
+## Vertices are supplied as an Array of Vector3 coordinates.
 func points(vertices: Array, color: Color = current_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_POINTS, vertices, color)
 
-## Draw line segments from an Array of Vector3 vertices.
+## Draw line segments between the given vertices.
+## Vertices are supplied as an Array of Vector3 coordinates.
 func line(vertices: Array, color: Color = current_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_LINE_STRIP, vertices, color)
 
-## Draw looping line segments from an Array of Vector3 vertices.
+## Draw looping line segments between the given vertices.
+## I.e. the last point connects back to the first.
+## Vertices are supplied as an Array of Vector3 coordinates.
 func line_loop(vertices: Array, color: Color = current_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
 

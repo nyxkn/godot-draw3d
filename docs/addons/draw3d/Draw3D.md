@@ -156,7 +156,7 @@ Helper function that returns a random color.
 func points(vertices: Array, color: Color = current_color) -> void
 ```
 
-Draw points from an Array of Vector3 vertices.
+Draw points at the given vertices. Vertices are supplied as an Array of Vector3 coordinates.
 
 #### Parameters
 
@@ -171,7 +171,7 @@ Draw points from an Array of Vector3 vertices.
 func line(vertices: Array, color: Color = current_color) -> void
 ```
 
-Draw line segments from an Array of Vector3 vertices.
+Draw line segments between the given vertices. Vertices are supplied as an Array of Vector3 coordinates.
 
 #### Parameters
 
@@ -186,7 +186,7 @@ Draw line segments from an Array of Vector3 vertices.
 func line_loop(vertices: Array, color: Color = current_color) -> void
 ```
 
-Draw looping line segments from an Array of Vector3 vertices.
+Draw looping line segments between the given vertices. I.e. the last point connects back to the first. Vertices are supplied as an Array of Vector3 coordinates.
 
 #### Parameters
 

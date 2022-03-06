@@ -95,9 +95,33 @@ func _process(delta):
     $Draw3D.circle(Vector3.ZERO, Basis(Vector3(time, 0, 0)))
 ```
 
-### Shortcut functions
+### List of drawing functions
 
-Shortcut functions are provided for quickly drawing shapes with predefined orientation,
+There are a few basic functions to draw primitives such as points and lines:
+
+- points
+- line
+- line_loop
+
+And for individually colored vertices:
+
+- points_colored
+- line_colored
+
+Then we have a few generic draw calls for basic shapes:
+
+- circle
+- arc
+- cube
+- sphere (see [note](#a-note-regarding-sphere) below)
+
+These all take a Basis parameter to define orientation and scale. See [above](#using-draw3d-as-a-canvas).
+
+See the [docs](docs/addons/draw3d/Draw3D.md) for more details on how to use all the functions.
+
+#### Shortcut functions
+
+Some shortcut functions are then provided for quickly drawing shapes with predefined orientation,
 or for defining rotation from a normal.
 
 With predefined orientation:
@@ -113,7 +137,6 @@ And from a normal:
 - arc_normal
 - cube_normal
 
-See the [docs](docs/addons/draw3d/Draw3D.md) for more details on how to use these.
 
 ### A note regarding sphere()
 
