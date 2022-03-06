@@ -2,6 +2,12 @@
 
 A small library for drawing simple shapes in 3D.
 
+It provides a custom `Draw3D` node that you can add to your scenes,
+in which you can draw simple geometry like lines, arcs, circles, and cubes.
+
+You can use this to easily add simple shapes to your objects.
+Mainly used for debugging, or visualizing prototypes.
+
 Usage is similar to the [custom drawing in 2D](https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html)
 that is already present in Godot, and for consistency I tried to keep
 the parameters in the same order as the 2D draw calls whenever possible.

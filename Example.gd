@@ -16,6 +16,7 @@ func _process(delta: float) -> void:
 	var time = OS.get_ticks_msec() * 0.001
 
 	$TransformMe.rotate_x(delta)
+	$TransformMe.translation.x = 9 + cos(time)
 	$Sphere.rotate_y(delta)
 
 	var arcs = $Arcs
