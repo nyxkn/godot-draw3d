@@ -77,10 +77,14 @@ func _ready():
     draw.cube(Vector3(1, 2, 3), Basis.IDENTITY.scaled(Vector3(1, 2, 3)))
 ```
 
+#### Basis
+
 The generic draw calls `circle()`, `arc()`, and `cube()` take a Basis argument.
 Basis in Godot is a transform that defines both rotation and scale, without origin.
 
-There's many ways of costructing a Basis. See the [Godot documentation](https://docs.godotengine.org/en/stable/classes/class_basis.html) for more information.
+This is the most flexible way of defining orientation and scale.
+There are many ways of costructing a Basis.
+See the [Godot documentation](https://docs.godotengine.org/en/stable/classes/class_basis.html) for more information.
 
 ### Caveat: drawing inside _process()
 
