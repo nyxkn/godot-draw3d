@@ -3,7 +3,7 @@
 A small library for drawing simple shapes in 3D.
 
 It provides a custom `Draw3D` node that you can add to your scenes,
-in which you can draw simple geometry like lines, arcs, circles, and cubes.
+with which you can draw simple geometry like lines, arcs, circles, and cubes.
 
 You can use this to easily add simple shapes to your objects.
 Mainly used for debugging, or visualizing prototypes.
