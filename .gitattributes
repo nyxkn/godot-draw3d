@@ -9,5 +9,7 @@
 /README.md          export-ignore
 /project.godot      export-ignore
 /icon.png           export-ignore
+/icon.png.import    export-ignore
 /icon.svg           export-ignore
 /docs               export-ignore
+/media              export-ignore
