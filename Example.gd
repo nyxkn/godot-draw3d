@@ -6,12 +6,12 @@ func _ready() -> void:
 	var primitives = $Primitives
 	primitives.points(random_vertices(20, Vector3(4, 0, 0)), Color.green)
 	primitives.line_colored(random_colored_vertices())
-	
+
 	# single draw per Draw3D instance. easily transformable
 	$Sphere.sphere(2.0, Color.cyan)
 	$TransformMe.circle_XY()
 	$TransformMe.points([Vector3.ZERO])
-	
+
 
 func _process(delta: float) -> void:
 	var time = OS.get_ticks_msec() * 0.001

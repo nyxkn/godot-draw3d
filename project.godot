@@ -26,7 +26,7 @@ config/icon="res://addons/draw3d/CanvasItem.svg"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/draw3d/plugin.cfg", "res://addons/godot-plugin-refresher/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/draw3d/plugin.cfg" )
 
 [physics]
 

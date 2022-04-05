@@ -21,7 +21,7 @@ const CUBE_VERTICES := [
 	# back 4 vertices
 	Vector3( -1, -1, -1 ),
 	Vector3( 1, -1, -1 ),
-	Vector3( 1, 1, -1 ), 
+	Vector3( 1, 1, -1 ),
 	Vector3( -1, 1, -1 ),
 ]
 
@@ -46,24 +46,24 @@ var line_width: int = LINE_WIDTH_DEFAULT # currently unimplemented in godot
 
 var m: SpatialMaterial
 
-	
+
 func _ready() -> void:
 	set_material()
 
-	
+
 func set_material() -> void:
 	# material values affect everything drawn
 	# if you need different parameters, you probably need to instance a new IM with a new material
 	# i.e. we cannot change point_size on the fly for different draws,
 	# as changing the value will change all previously drawn points as well
 	m = SpatialMaterial.new()
-	
+
 	m.vertex_color_use_as_albedo = true
 	m.flags_use_point_size = true
 	m.flags_unshaded = true
 	change_point_size(point_size)
 	change_line_width(line_width)
-	
+
 	set_material_override(m)
 
 
@@ -101,11 +101,11 @@ func change_color(color: Color = COLOR_DEFAULT) -> void:
 ## Helper function that returns a random color.
 func random_color() -> Color:
 	return Color(rand_range(0,1), rand_range(0,1), rand_range(0,1))
-	
+
 
 func points_test(clear: bool = false) -> void:
 	clear && clear()
-	
+
 	begin(Mesh.PRIMITIVE_POINTS, null)
 	for i in 100:
 		set_color(random_color())
@@ -115,7 +115,7 @@ func points_test(clear: bool = false) -> void:
 
 func line_test(clear: bool = false) -> void:
 	clear && clear()
-	
+
 	begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 	for i in 50:
 		set_color(random_color())
@@ -201,7 +201,7 @@ func line_colored(colored_vertices: Array) -> void:
 func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
 	# by default, this is a circle on the XZ plane.
 	# this seems to make most sense in 3d as a highlight of objects
-	
+
 	var resolution = circle_resolution
 	var transform = Transform(basis, position)
 
@@ -213,7 +213,7 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 		circle.append(angle_vector)
 
 	line_loop(circle, color)
-	
+
 	# also draw the points inbetween segments
 #	points(circle, color)
 
@@ -225,7 +225,7 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 	# angles in radians, obviously
 
 	var arc2 = PoolVector2Array()
-	
+
 	var angle_total = angle_to - angle_from
 	if angle_total > TAU:
 		print("Angle is > TAU. We won't draw.")
@@ -243,11 +243,11 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 	var arc3 = PoolVector3Array()
 	for p in arc2:
 		arc3.push_back(Vector3(p.x, p.y, 0))
-	
+
 	# apply 3d transform
 	for i in arc3.size():
 		arc3[i] = transform.xform(arc3[i])
-	
+
 	return arc3
 
 
@@ -263,7 +263,7 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, draw_origin: bool = false, color: Color = current_color):
 	var arc: PoolVector3Array
 	var transform = Transform(basis, position)
-	
+
 	if draw_origin:
 		arc = PoolVector3Array()
 		arc.push_back(transform.xform(Vector3.ZERO))
@@ -272,7 +272,7 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 	else:
 		arc = get_arc(angle_from, angle_to, transform)
 		line(arc, color)
-	
+
 	# also draw the points inbetween segments
 #	points(arc, color)
 
@@ -288,10 +288,10 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
 	var vertices = CUBE_VERTICES.duplicate()
 	var transform = Transform(basis, position)
-	
+
 	for i in vertices.size():
 		vertices[i] = transform.xform(vertices[i])
-	
+
 	line_loop(vertices.slice(0, 3), color)
 	line_loop(vertices.slice(4, 7), color)
 	for i in 4:
@@ -304,7 +304,7 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 ## Create a sphere shape.
 ##
 ## This does not take a position vector, so it will always be drawn at (0, 0, 0)
-## 
+##
 ## It's best to draw the sphere on a dedicated Draw3D node so you can manipulate it by adjusting the
 ## transform properties.
 ##
@@ -313,7 +313,7 @@ func sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, l
 	set_color(color)
 	add_sphere(lats, lons, radius, add_uv)
 	end()
-	
+
 
 ################################
 # SHORTCUTS - from normal
@@ -324,7 +324,7 @@ func basis_from_normal(normal: Vector3) -> Basis:
 	var X = Vector3(Y.y, -Y.x, 0)
 	# covering the edge case where our normal is (0, 0, 1)
 	if X.length_squared() == 0: X = Vector3(-1, 0, 0)
-	
+
 	var Z = X.cross(Y)
 	return Basis(X, Y, Z)
 
@@ -357,7 +357,7 @@ func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, colo
 ##
 func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin: bool = false, color: Color = current_color) -> void:
 	if ! check_normalization(normal): return
-	
+
 	var basis = basis_from_normal(normal)
 	basis = basis.scaled(Vector3(radius, radius, radius))
 	arc(position, basis, angle_from, angle_to, draw_origin, color)
@@ -392,7 +392,7 @@ func scale_basis(scale: float) -> Basis:
 func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void:
 	var orientation = scale_basis(radius)
 	circle(center, orientation, color)
-	
+
 
 ## Shortcut function to draw a circle lying on the XY plane.
 func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void:
