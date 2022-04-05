@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://Example.gd" type="Script" id=1]
-[ext_resource path="res://addons/draw3d/Draw3D.gd" type="Script" id=2]
+[ext_resource path="res://draw_3d_example.gd" type="Script" id=1]
+[ext_resource path="res://addons/draw3d/draw_3d.gd" type="Script" id=2]
 
 [sub_resource type="SpatialMaterial" id=1]
 flags_unshaded = true
@@ -45,16 +45,16 @@ vertex_color_use_as_albedo = true
 params_line_width = 2.0
 params_point_size = 8.0
 
-[node name="DrawTest" type="Spatial"]
+[node name="Example" type="Spatial"]
 script = ExtResource( 1 )
 
 [node name="Sphere" type="ImmediateGeometry" parent="."]
-transform = Transform( 0.224872, 0, 0.969337, 0, 1, 0, -0.969337, 0, 0.224872, -5, 0, -1 )
+transform = Transform( 0.691736, 0, -0.71444, 0, 1, 0, 0.71444, 0, 0.691736, -5, 0, -1 )
 material_override = SubResource( 1 )
 script = ExtResource( 2 )
 
 [node name="TransformMe" type="ImmediateGeometry" parent="."]
-transform = Transform( 0.999689, 0, 0, 0, 0.995093, -0.0162402, 0, 0.016248, 0.994876, 8.85033, 0, 0 )
+transform = Transform( 0.999689, 0, 0, 0, -0.526003, 0.843912, 0, -0.844106, -0.525897, 9.7569, 0, 0 )
 material_override = SubResource( 2 )
 script = ExtResource( 2 )
 
