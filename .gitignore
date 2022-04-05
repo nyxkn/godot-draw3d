@@ -14,5 +14,6 @@ export_presets.cfg
 data_*/
 mono_crash.*.json
 
-# project ignores
+# temp files
+*~
 README.md.tmp
