@@ -36,6 +36,7 @@ draw.cube()
 ## Usage
 
 Add the Draw3D node to your scene and then call any of the draw functions.
+You can find the Draw3D node in the `Create New Node` dialog.
 
 There are two ways of using this library:
 
@@ -146,7 +147,6 @@ And from a normal:
 - circle_normal
 - arc_normal
 - cube_normal
-
 
 ### A note regarding sphere()
 
