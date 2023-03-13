@@ -1,5 +1,8 @@
-tool
-extends ImmediateGeometry
+@tool
+@icon("res://addons/draw3d/CanvasItem.svg")
+
+class_name Draw3D
+extends ImmediateMesh
 
 ##
 ## A small library for drawing simple shapes in 3D.
@@ -8,8 +11,6 @@ extends ImmediateGeometry
 ##
 ## https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html
 ##
-class_name Draw3D, "res://addons/draw3d/CanvasItem.svg"
-
 
 # https://www.khronos.org/opengl/wiki/Primitive
 const CUBE_VERTICES := [
@@ -25,7 +26,7 @@ const CUBE_VERTICES := [
 	Vector3( -1, 1, -1 ),
 ]
 
-const COLOR_DEFAULT: Color = Color.white
+const COLOR_DEFAULT: Color = Color.WHITE
 const POINT_SIZE_DEFAULT: int = 8
 const LINE_WIDTH_DEFAULT: int = 2
 
@@ -33,18 +34,18 @@ const LINE_WIDTH_DEFAULT: int = 2
 ##
 ## Also applies for the resolution of arcs.
 ##
-export(int) var circle_resolution: int = 32
+@export var circle_resolution: int = 32
 
 ## This holds the color value to use unless overridden by the specific draw functions.
 ##
 ## Change this with change_color().
 ##
-var current_color: Color = COLOR_DEFAULT setget change_color
+var current_color: Color = COLOR_DEFAULT : set = change_color
 
 var point_size: int = POINT_SIZE_DEFAULT
 var line_width: int = LINE_WIDTH_DEFAULT # currently unimplemented in godot
 
-var m: SpatialMaterial
+var m: StandardMaterial3D
 
 
 func _ready() -> void:
@@ -56,7 +57,7 @@ func set_material() -> void:
 	# if you need different parameters, you probably need to instance a new IM with a new material
 	# i.e. we cannot change point_size on the fly for different draws,
 	# as changing the value will change all previously drawn points as well
-	m = SpatialMaterial.new()
+	m = StandardMaterial3D.new()
 
 	m.vertex_color_use_as_albedo = true
 	m.flags_use_point_size = true
@@ -64,7 +65,7 @@ func set_material() -> void:
 	change_point_size(point_size)
 	change_line_width(line_width)
 
-	set_material_override(m)
+#	set_material_override(m)
 
 
 ## Change point size.
@@ -100,27 +101,27 @@ func change_color(color: Color = COLOR_DEFAULT) -> void:
 
 ## Helper function that returns a random color.
 func random_color() -> Color:
-	return Color(rand_range(0,1), rand_range(0,1), rand_range(0,1))
+	return Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
 
 
 func points_test(clear: bool = false) -> void:
-	clear && clear()
+	if clear: clear_surfaces()
 
-	begin(Mesh.PRIMITIVE_POINTS, null)
+	surface_begin(Mesh.PRIMITIVE_POINTS, null)
 	for i in 100:
-		set_color(random_color())
-		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
-	end()
+		surface_set_color(random_color())
+		surface_add_vertex(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
+	surface_end()
 
 
 func line_test(clear: bool = false) -> void:
-	clear && clear()
+	if clear: clear_surfaces()
 
-	begin(Mesh.PRIMITIVE_LINE_STRIP, null)
+	surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 	for i in 50:
-		set_color(random_color())
-		add_vertex(Vector3(rand_range(-1, 1), rand_range(-1, 1), rand_range(-1, 1)))
-	end()
+		surface_set_color(random_color())
+		surface_add_vertex(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
+	surface_end()
 
 
 
@@ -128,19 +129,19 @@ func line_test(clear: bool = false) -> void:
 # draw_primitive
 
 func draw_primitive(primitive_type: int, vertices: Array, color: Color = current_color) -> void:
-	begin(primitive_type, null)
+	surface_begin(primitive_type, null)
 	for v in vertices:
-		set_color(color)
-		add_vertex(v)
-	end()
+		surface_set_color(color)
+		surface_add_vertex(v)
+	surface_end()
 
 
 func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color: Color = current_color) -> void:
-	begin(primitive_type, null)
+	surface_begin(primitive_type, null)
 	for i in colored_vertices.size():
-		set_color(colored_vertices[i][1])
-		add_vertex(colored_vertices[i][0])
-	end()
+		surface_set_color(colored_vertices[i][1])
+		surface_add_vertex(colored_vertices[i][0])
+	surface_end()
 
 
 ################################
@@ -160,7 +161,8 @@ func line(vertices: Array, color: Color = current_color) -> void:
 ## I.e. the last point connects back to the first.
 ## Vertices are supplied as an Array of Vector3 coordinates.
 func line_loop(vertices: Array, color: Color = current_color) -> void:
-	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
+	print("unimplemented")
+#	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
 
 
 ################################
@@ -203,13 +205,13 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 	# this seems to make most sense in 3d as a highlight of objects
 
 	var resolution = circle_resolution
-	var transform = Transform(basis, position)
+	var transform = Transform3D(basis, position)
 
 	var circle = []
 	for i in resolution:
 		var angle = TAU / resolution * i
 		var angle_vector = Vector3(cos(angle), 0, sin(angle))
-		angle_vector = transform.xform(angle_vector)
+		angle_vector = transform * angle_vector
 		circle.append(angle_vector)
 
 	line_loop(circle, color)
@@ -221,15 +223,15 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 ###############################
 # ARC
 
-func get_arc(angle_from: float, angle_to: float, transform: Transform = Transform.IDENTITY) -> PoolVector3Array:
+func get_arc(angle_from: float, angle_to: float, transform: Transform3D = Transform3D.IDENTITY) -> PackedVector3Array:
 	# angles in radians, obviously
 
-	var arc2 = PoolVector2Array()
+	var arc2 = PackedVector2Array()
 
 	var angle_total = angle_to - angle_from
 	if angle_total > TAU:
 		print("Angle is > TAU. We won't draw.")
-		return PoolVector3Array()
+		return PackedVector3Array()
 
 	var resolution = lerp(1, circle_resolution + 1, angle_total / TAU)
 
@@ -240,13 +242,13 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 		arc2.push_back(angle_vector)
 
 	# convert to 3d
-	var arc3 = PoolVector3Array()
+	var arc3 = PackedVector3Array()
 	for p in arc2:
 		arc3.push_back(Vector3(p.x, p.y, 0))
 
 	# apply 3d transform
 	for i in arc3.size():
-		arc3[i] = transform.xform(arc3[i])
+		arc3[i] = transform * arc3[i]
 
 	return arc3
 
@@ -261,12 +263,12 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform = Transfor
 ## (a circular sector).
 ##
 func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, draw_origin: bool = false, color: Color = current_color):
-	var arc: PoolVector3Array
-	var transform = Transform(basis, position)
+	var arc: PackedVector3Array
+	var transform = Transform3D(basis, position)
 
 	if draw_origin:
-		arc = PoolVector3Array()
-		arc.push_back(transform.xform(Vector3.ZERO))
+		arc = PackedVector3Array()
+		arc.push_back(transform * Vector3.ZERO)
 		arc.append_array(get_arc(angle_from, angle_to, transform))
 		line_loop(arc, color)
 	else:
@@ -287,10 +289,10 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 ##
 func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
 	var vertices = CUBE_VERTICES.duplicate()
-	var transform = Transform(basis, position)
+	var transform = Transform3D(basis, position)
 
 	for i in vertices.size():
-		vertices[i] = transform.xform(vertices[i])
+		vertices[i] = transform * vertices[i]
 
 	line_loop(vertices.slice(0, 3), color)
 	line_loop(vertices.slice(4, 7), color)
@@ -309,10 +311,11 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 ## transform properties.
 ##
 func sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
-	begin(Mesh.PRIMITIVE_LINE_STRIP, null)
-	set_color(color)
-	add_sphere(lats, lons, radius, add_uv)
-	end()
+	print("unimplemented")
+#	surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
+#	surface_set_color(color)
+#	add_sphere(lats, lons, radius, add_uv)
+#	surface_end()
 
 
 ################################

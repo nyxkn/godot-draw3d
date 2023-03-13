@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorPlugin
 
 
@@ -7,7 +7,7 @@ extends EditorPlugin
 
 
 #func _enter_tree():
-#	add_custom_type("Draw3D", "ImmediateGeometry", preload("draw_3d.gd"), preload("CanvasItem.svg"))
+#	add_custom_type("Draw3D", "ImmediateMesh", preload("draw_3d.gd"), preload("CanvasItem.svg"))
 
 
 #func _exit_tree():

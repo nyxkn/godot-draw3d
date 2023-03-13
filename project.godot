@@ -6,27 +6,18 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
-
-_global_script_classes=[ {
-"base": "ImmediateGeometry",
-"class": "Draw3D",
-"language": "GDScript",
-"path": "res://addons/draw3d/draw_3d.gd"
-} ]
-_global_script_class_icons={
-"Draw3D": "res://addons/draw3d/CanvasItem.svg"
-}
+config_version=5
 
 [application]
 
 config/name="draw3d"
 run/main_scene="res://draw_3d_example.tscn"
+config/features=PackedStringArray("4.0")
 config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/draw3d/plugin.cfg" )
+enabled=PackedStringArray("res://addons/draw3d/plugin.cfg")
 
 [physics]
 
