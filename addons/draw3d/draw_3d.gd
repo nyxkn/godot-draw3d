@@ -1,8 +1,8 @@
 @tool
-@icon("res://addons/draw3d/CanvasItem.svg")
+#@icon("res://addons/draw3d/CanvasItem.svg")
 
 class_name Draw3D
-extends ImmediateMesh
+extends MeshInstance3D
 
 ##
 ## A small library for drawing simple shapes in 3D.
@@ -45,10 +45,11 @@ var current_color: Color = COLOR_DEFAULT : set = change_color
 var point_size: int = POINT_SIZE_DEFAULT
 var line_width: int = LINE_WIDTH_DEFAULT # currently unimplemented in godot
 
-var m: StandardMaterial3D
+var material: StandardMaterial3D
 
 
 func _ready() -> void:
+	mesh = ImmediateMesh.new()
 	set_material()
 
 
@@ -57,11 +58,11 @@ func set_material() -> void:
 	# if you need different parameters, you probably need to instance a new IM with a new material
 	# i.e. we cannot change point_size on the fly for different draws,
 	# as changing the value will change all previously drawn points as well
-	m = StandardMaterial3D.new()
+	material = StandardMaterial3D.new()
 
-	m.vertex_color_use_as_albedo = true
-	m.flags_use_point_size = true
-	m.flags_unshaded = true
+	material.vertex_color_use_as_albedo = true
+	material.flags_use_point_size = true
+	material.flags_unshaded = true
 	change_point_size(point_size)
 	change_line_width(line_width)
 
@@ -77,7 +78,7 @@ func set_material() -> void:
 func change_point_size(size: int = POINT_SIZE_DEFAULT) -> void:
 	# NOTE: this changes the material properties, also affecting everything that was previously drawn
 	point_size = size
-	m.params_point_size = point_size
+	material.params_point_size = point_size
 
 
 ## Change line width.
@@ -88,7 +89,7 @@ func change_point_size(size: int = POINT_SIZE_DEFAULT) -> void:
 ##
 func change_line_width(width: int = LINE_WIDTH_DEFAULT) -> void:
 	line_width = width
-	m.params_line_width = line_width # currently unimplemented in godot
+	material.params_line_width = line_width # currently unimplemented in godot
 
 
 ## Change default color for all subsequent draws.
@@ -105,43 +106,46 @@ func random_color() -> Color:
 
 
 func points_test(clear: bool = false) -> void:
-	if clear: clear_surfaces()
+	if clear: clear()
 
-	surface_begin(Mesh.PRIMITIVE_POINTS, null)
+	mesh.surface_begin(Mesh.PRIMITIVE_POINTS, null)
 	for i in 100:
-		surface_set_color(random_color())
-		surface_add_vertex(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
-	surface_end()
+		mesh.surface_set_color(random_color())
+		mesh.surface_add_vertex(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
+	mesh.surface_end()
 
 
 func line_test(clear: bool = false) -> void:
-	if clear: clear_surfaces()
+	if clear: clear()
 
-	surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
+	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 	for i in 50:
-		surface_set_color(random_color())
-		surface_add_vertex(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
-	surface_end()
+		mesh.surface_set_color(random_color())
+		mesh.surface_add_vertex(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
+	mesh.surface_end()
 
+
+func clear() -> void:
+	mesh.clear_surfaces()
 
 
 ################################
 # draw_primitive
 
 func draw_primitive(primitive_type: int, vertices: Array, color: Color = current_color) -> void:
-	surface_begin(primitive_type, null)
+	mesh.surface_begin(primitive_type, null)
 	for v in vertices:
-		surface_set_color(color)
-		surface_add_vertex(v)
-	surface_end()
+		mesh.surface_set_color(color)
+		mesh.surface_add_vertex(v)
+	mesh.surface_end()
 
 
 func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color: Color = current_color) -> void:
-	surface_begin(primitive_type, null)
+	mesh.surface_begin(primitive_type, null)
 	for i in colored_vertices.size():
-		surface_set_color(colored_vertices[i][1])
-		surface_add_vertex(colored_vertices[i][0])
-	surface_end()
+		mesh.surface_set_color(colored_vertices[i][1])
+		mesh.surface_add_vertex(colored_vertices[i][0])
+	mesh.surface_end()
 
 
 ################################
@@ -312,10 +316,10 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 ##
 func sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
 	print("unimplemented")
-#	surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
-#	surface_set_color(color)
+#	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
+#	mesh.surface_set_color(color)
 #	add_sphere(lats, lons, radius, add_uv)
-#	surface_end()
+#	mesh.surface_end()
 
 
 ################################
