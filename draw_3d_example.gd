@@ -4,9 +4,9 @@ extends Node3D
 
 func _ready() -> void:
 	var primitives = $Primitives
-#	primitives.points(random_vertices(20, Vector3(4, 0, 0)), Color.GREEN)
-	primitives.points(random_colored_vertices(20, Vector3(4, 0, 0)))
-	primitives.line(random_colored_vertices())
+#	primitives.draw_points(random_vertices(20, Vector3(4, 0, 0)), Color.GREEN)
+	primitives.draw_points(random_colored_vertices(20, Vector3(4, 0, 0)))
+	primitives.draw_line(random_colored_vertices())
 
 	# single static draw per Draw3D instance
 	# draw once then transform later
