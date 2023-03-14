@@ -218,7 +218,8 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 		angle_vector = transform * angle_vector
 		circle.append(angle_vector)
 
-	line_loop(circle, color)
+#	line_loop(circle, color)
+	line(circle, color)
 
 	# also draw the points inbetween segments
 #	points(circle, color)
@@ -274,7 +275,8 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 		arc = PackedVector3Array()
 		arc.push_back(transform * Vector3.ZERO)
 		arc.append_array(get_arc(angle_from, angle_to, transform))
-		line_loop(arc, color)
+#		line_loop(arc, color)
+		line(arc, color)
 	else:
 		arc = get_arc(angle_from, angle_to, transform)
 		line(arc, color)
@@ -298,8 +300,10 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 	for i in vertices.size():
 		vertices[i] = transform * vertices[i]
 
-	line_loop(vertices.slice(0, 3), color)
-	line_loop(vertices.slice(4, 7), color)
+#	line_loop(vertices.slice(0, 3), color)
+	line(vertices.slice(0, 3), color)
+#	line_loop(vertices.slice(4, 7), color)
+	line(vertices.slice(4, 7), color)
 	for i in 4:
 		line([vertices[i], vertices[i+4]], color)
 
