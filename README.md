@@ -37,7 +37,7 @@ draw.cube()
 
 ## Usage
 
-Add the Draw3D node to your scene and then call any of the draw functions.
+Add the Draw3D node to your scene and then call any of the draw or shape functions.
 You can find the Draw3D node in the `Create New Node` dialog.
 
 There are two ways of using this library:
@@ -52,12 +52,12 @@ Or of course a mix of either.
 With this method, you add a new Draw3D instance as a child of your object,
 and then you call a draw function from your script.
 
-Take note that the Draw3D node extends [ImmediateGeometry](https://docs.godotengine.org/en/stable/classes/class_immediategeometry.html),
+Take note that the Draw3D node extends [MeshInstance3D](https://docs.godotengine.org/en/stable/classes/class_meshinstance3d.html),
 so you get to use all of its features.
-Most notably the transform it inherits from the Spatial node.
+Most notably the transform it inherits from the Node3D node.
 
 So you can draw a basic shape with no position offset, no orientation, and no scale,
-and use the ImmediateGeometry's transform properties instead to adjust all of those things.
+and use the MeshInstance3D's transform properties instead to adjust all of those things.
 
 ``` gdscript
 # assuming you've previously added a $Draw3D node as a child
@@ -88,11 +88,11 @@ func _ready():
 
 #### Basis
 
-The generic draw calls `circle()`, `arc()`, and `cube()` take a Basis argument.
+The generic shape drawing calls `circle()`, `arc()`, and `cube()` take a Basis argument.
 Basis in Godot is a transform that defines both rotation and scale, without origin.
 
 This is the most flexible way of defining orientation and scale.
-There are many ways of costructing a Basis.
+There are many ways of constructing a Basis.
 See the [Godot documentation](https://docs.godotengine.org/en/stable/classes/class_basis.html) for more information.
 
 ### Caveat: drawing inside _process()
@@ -112,25 +112,19 @@ func _process(delta):
 
 There are a few basic functions to draw primitives such as points and lines:
 
-- points
-- line
-- line_loop
+- draw_points
+- draw_line
+- draw_line_loop
 
-And for individually colored vertices:
-
-- points_colored
-- line_colored
-
-Then we have a few generic draw calls for basic shapes:
+Then there are a few generic draw calls for basic shapes:
 
 - circle
 - arc
 - cube
-- sphere (see [note](#a-note-regarding-sphere) below)
 
 These all take a Basis parameter to define orientation and scale. See [above](#using-draw3d-as-a-canvas).
 
-See the [docs](docs/addons/draw3d/Draw3D.md) for more details on how to use all the functions.
+<!-- See the [docs](docs/addons/draw3d/Draw3D.md) for more details on how to use all the functions. -->
 
 #### Shortcut functions
 
@@ -150,29 +144,21 @@ And from a normal:
 - arc_normal
 - cube_normal
 
-### A note regarding sphere()
-
-This is the only function that cannot take a position vector,
-so you probably want to use this in a Draw3D instance that's
-dedicated to the sphere exclusively.
-
 ## Example
 
 You can check out the provided Example scene to see a few working examples.
 
-Or have a quick look at [Example.gd](Example.gd) to see the usage of a few different draw calls.
+Or have a quick look at [draw_3d_example.gd](draw_3d_example.gd)
+to see an example usage of some of the shape functions.
 
 ## Documentation
 
-You can find generated documentation in the [docs](docs/addons/draw3d/Draw3D.md) folder.
-
-The documentation was created with [GDScriptify](https://github.com/hiulit/GDScriptify).
+You can find the generated documentation from within the Help dialog in Godot.
+Just search for Draw3D.
 
 ## Credits
 
 Inspired by [this short script](https://github.com/Zireael07/FreeRoamRoguelikeRacerPrototype/blob/master/game/scripts/draw_line.gd) by [Zireael07](https://github.com/Zireael07).
-
-The script icon is Godot's [CanvasItem.svg](https://github.com/godotengine/godot/blob/master/editor/icons/CanvasItem.svg).
 
 A few similar projects:
 
