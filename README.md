@@ -1,10 +1,13 @@
 # Draw3D
 
-A small library for drawing simple shapes in 3D.
+A small library for drawing simple wireframe shapes in 3D.
+
+***Updated for Godot4***. For the 3.x version see the
+[3.x branch](https://github.com/nyxkn/godot-draw3d/tree/3.x).
 
 <img height=64 src="icon.png"><img>
 
-It provides a custom `Draw3D` node that you can add to your scenes,
+This library provides a custom `Draw3D` node that you can add to your scenes,
 with which you can draw simple geometry like lines, arcs, circles, and cubes.
 
 You can use this to easily add simple shapes to your objects.
