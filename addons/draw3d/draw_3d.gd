@@ -1,5 +1,4 @@
 @tool
-#@icon("res://addons/draw3d/CanvasItem.svg")
 
 class_name Draw3D
 extends MeshInstance3D
@@ -26,9 +25,7 @@ const CUBE_VERTICES := [
 	Vector3( -1, 1, -1 ),
 ]
 
-const COLOR_DEFAULT: Color = Color.WHITE
-const POINT_SIZE_DEFAULT: int = 8
-const LINE_WIDTH_DEFAULT: int = 2
+const MATERIAL_POINT_SIZE: int = 8
 
 ## Number of segments that will be used to draw a circle.
 ##
@@ -36,76 +33,57 @@ const LINE_WIDTH_DEFAULT: int = 2
 ##
 @export var circle_resolution: int = 32
 
-## This holds the color value to use unless overridden by the specific draw functions.
-##
-## Change this with change_color().
-##
-var current_color: Color = COLOR_DEFAULT : set = change_color
+@export var draw_vertex_points: bool = false
 
-var point_size: int = POINT_SIZE_DEFAULT
-var line_width: int = LINE_WIDTH_DEFAULT # currently unimplemented in godot
+## This holds the default color value to use.
+## It will be overridden by the specific draw functions *color* parameter.
+##
+@export var default_color: Color = Color.WHITE
 
-var material: StandardMaterial3D
+
+var _default_material: StandardMaterial3D
+var _default_points_material: StandardMaterial3D
 
 
 func _ready() -> void:
 	mesh = ImmediateMesh.new()
-	set_material()
+	_setup_materials()
+	
 
+func _setup_materials() -> void:
+	# here we are setting the material to material_override
+	# which affects everything drawn within this mesh
+	# but in godot4 it is actually possible to set the material per surface
+	# a surface is a single drawing, created between surface_begin and surface_end
+	# if we want to support this we need to add an optional material parameter to all functions
+	# but the usefulness of this seems limited since we're drawing wireframe things anyway
+	# and not many material parameters apply to these
+	# plus it's easy to just make a new meshinstance instead if you need different material
+	# we support this at least in draw_primitive because why not
+	
+	_default_material = StandardMaterial3D.new()
+	_default_material.vertex_color_use_as_albedo = true
+	_default_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 
-func set_material() -> void:
-	# material values affect everything drawn
-	# if you need different parameters, you probably need to instance a new IM with a new material
-	# i.e. we cannot change point_size on the fly for different draws,
-	# as changing the value will change all previously drawn points as well
-	material = StandardMaterial3D.new()
-
-	material.vertex_color_use_as_albedo = true
-	material.flags_use_point_size = true
-	material.flags_unshaded = true
-	change_point_size(point_size)
-	change_line_width(line_width)
-
-#	set_material_override(m)
-
-
-## Change point size.
-##
-## This applies to all points currently and previously drawn.
-##
-## Call without arguments to reset to the default size.
-##
-func change_point_size(size: int = POINT_SIZE_DEFAULT) -> void:
-	# NOTE: this changes the material properties, also affecting everything that was previously drawn
-	point_size = size
-	material.params_point_size = point_size
-
-
-## Change line width.
-##
-## Call without arguments to reset to the default width.
-##
-## *This is currently unimplemented in Godot and has no effect.*
-##
-func change_line_width(width: int = LINE_WIDTH_DEFAULT) -> void:
-	line_width = width
-	material.params_line_width = line_width # currently unimplemented in godot
-
-
-## Change default color for all subsequent draws.
-##
-## Call without arguments to reset to the default color.
-##
-func change_color(color: Color = COLOR_DEFAULT) -> void:
-	current_color = color
+	_default_points_material = _default_material.duplicate()
+	# enabling use_point_size replaces all lines with vertex points
+	# this is different from godot3, where it only affected the points primitives
+	# and not the line ones. is this a bug or intended?
+	# we're working around this by having a different material for points surfaces
+	_default_points_material.use_point_size = true
+	_default_points_material.point_size = MATERIAL_POINT_SIZE
 
 
 ## Helper function that returns a random color.
-func random_color() -> Color:
-	return Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
+static func random_color() -> Color:
+	return Color(randf_range(0, 1), randf_range(0, 1), randf_range(0, 1))
 
 
-func points_test(clear: bool = false) -> void:
+func clear() -> void:
+	mesh.clear_surfaces()
+	
+	
+func _points_test(clear: bool = false) -> void:
 	if clear: clear()
 
 	mesh.surface_begin(Mesh.PRIMITIVE_POINTS, null)
@@ -115,7 +93,7 @@ func points_test(clear: bool = false) -> void:
 	mesh.surface_end()
 
 
-func line_test(clear: bool = false) -> void:
+func _line_test(clear: bool = false) -> void:
 	if clear: clear()
 
 	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
@@ -125,27 +103,42 @@ func line_test(clear: bool = false) -> void:
 	mesh.surface_end()
 
 
-func clear() -> void:
-	mesh.clear_surfaces()
-
-
 ################################
 # draw_primitive
 
-func draw_primitive(primitive_type: int, vertices: Array, color: Color = current_color) -> void:
-	mesh.surface_begin(primitive_type, null)
-	for v in vertices:
-		mesh.surface_set_color(color)
-		mesh.surface_add_vertex(v)
-	mesh.surface_end()
-
-
-func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color: Color = current_color) -> void:
-	mesh.surface_begin(primitive_type, null)
-	for i in colored_vertices.size():
-		mesh.surface_set_color(colored_vertices[i][1])
-		mesh.surface_add_vertex(colored_vertices[i][0])
-	mesh.surface_end()
+func draw_primitive(
+	primitive_type: int,
+	vertices: Array,
+	color: Color = default_color,
+	custom_material: BaseMaterial3D = null
+	) -> void:
+	
+	if vertices[0] is Vector3:
+		# we're dealing with a list of vertices
+		mesh.surface_begin(primitive_type, null)
+		for v in vertices:
+			mesh.surface_set_color(color)
+			mesh.surface_add_vertex(v)
+		mesh.surface_end()
+	elif vertices[0] is Array:
+		# we're dealing with a list of colored vertices
+		# a colored vertex is [vertex, color]
+		mesh.surface_begin(primitive_type, null)
+		for i in vertices.size():
+			mesh.surface_set_color(vertices[i][1])
+			mesh.surface_add_vertex(vertices[i][0])
+		mesh.surface_end()		
+	
+	var material
+	if custom_material:
+		material = custom_material
+	elif primitive_type == Mesh.PRIMITIVE_POINTS:
+		material = _default_points_material
+	else:
+		material = _default_material
+		
+	var last_surface_idx = mesh.get_surface_count() - 1
+	mesh.surface_set_material(last_surface_idx, material)
 
 
 ################################
@@ -153,47 +146,30 @@ func draw_primitive_colored(primitive_type: int, colored_vertices: Array, color:
 
 ## Draw points at the given vertices.
 ## Vertices are supplied as an Array of Vector3 coordinates.
-func points(vertices: Array, color: Color = current_color) -> void:
+func points(vertices: Array, color: Color = default_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_POINTS, vertices, color)
+
 
 ## Draw line segments between the given vertices.
 ## Vertices are supplied as an Array of Vector3 coordinates.
-func line(vertices: Array, color: Color = current_color) -> void:
+func line(vertices: Array, color: Color = default_color) -> void:
 	draw_primitive(Mesh.PRIMITIVE_LINE_STRIP, vertices, color)
+	
+	if draw_vertex_points:
+		points(vertices, color)
+
 
 ## Draw looping line segments between the given vertices.
 ## I.e. the last point connects back to the first.
 ## Vertices are supplied as an Array of Vector3 coordinates.
-func line_loop(vertices: Array, color: Color = current_color) -> void:
+func line_loop(vertices: Array, color: Color = default_color) -> void:
 #	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
-	vertices.push_back(vertices[0])
-	line(vertices, color)
-
-
-################################
-# draw_primitive_colored shortcuts
-
-## Draw points from an Array of *colored vertices*.
-##
-## A *colored vertex* is an Array with a Vector3 vertex and a Color value:
-##
-## `[ vertex: Vector3, color: Color ]`
-##
-## This allows you to draw points with individual colors.
-##
-func points_colored(colored_vertices: Array) -> void:
-	draw_primitive_colored(Mesh.PRIMITIVE_POINTS, colored_vertices)
-
-## Draw line segments from an Array of *colored vertices*.
-##
-## A *colored vertex* is an Array with a Vector3 vertex and a Color value:
-##
-## `[ vertex: Vector3, color: Color ]`
-##
-## This allows you to draw line segments that blend between the colors of the two surrounding vertices.
-##
-func line_colored(colored_vertices: Array) -> void:
-	draw_primitive_colored(Mesh.PRIMITIVE_LINE_STRIP, colored_vertices)
+	var looped_vertices = vertices.duplicate()
+	looped_vertices.push_back(vertices[0])
+	line(looped_vertices, color)
+	
+	if draw_vertex_points:
+		points(vertices, color)
 
 
 ################################
@@ -204,7 +180,7 @@ func line_colored(colored_vertices: Array) -> void:
 ## Pass a Basis argument to define orientation.
 ## Otherwise defaults to lying on the XZ plane.
 ##
-func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
+func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = default_color) -> void:
 	# by default, this is a circle on the XZ plane.
 	# this seems to make most sense in 3d as a highlight of objects
 
@@ -219,9 +195,6 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 		circle.append(angle_vector)
 
 	line_loop(circle, color)
-
-	# also draw the points inbetween segments
-#	points(circle, color)
 
 
 ###############################
@@ -266,7 +239,7 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform3D = Transf
 ## Optionally also draw the origin point and connect it with two lines on each end
 ## (a circular sector).
 ##
-func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, draw_origin: bool = false, color: Color = current_color):
+func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, draw_origin: bool = false, color: Color = default_color):
 	var arc: PackedVector3Array
 	var transform = Transform3D(basis, position)
 
@@ -279,9 +252,6 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 		arc = get_arc(angle_from, angle_to, transform)
 		line(arc, color)
 
-	# also draw the points inbetween segments
-#	points(arc, color)
-
 
 ################################
 # CUBE - wireframe cube
@@ -291,7 +261,7 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 ## Pass a Basis argument to define orientation.
 ## Otherwise defaults to no orientation.
 ##
-func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = current_color) -> void:
+func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = default_color) -> void:
 	var vertices = CUBE_VERTICES.duplicate()
 	var transform = Transform3D(basis, position)
 
@@ -314,7 +284,7 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 ## It's best to draw the sphere on a dedicated Draw3D node so you can manipulate it by adjusting the
 ## transform properties.
 ##
-func sphere(radius: float = 1.0, color: Color = current_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
+func sphere(radius: float = 1.0, color: Color = default_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
 	print("unimplemented")
 #	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 #	mesh.surface_set_color(color)
@@ -350,7 +320,7 @@ func check_normalization(normal: Vector3) -> bool:
 ##
 ## The normal should be normalized.
 ##
-func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = current_color) -> void:
+func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = default_color) -> void:
 	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
@@ -362,7 +332,7 @@ func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, colo
 ##
 ## The normal should be normalized.
 ##
-func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin: bool = false, color: Color = current_color) -> void:
+func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin: bool = false, color: Color = default_color) -> void:
 	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
@@ -374,7 +344,7 @@ func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to:
 ##
 ## The normal should be normalized.
 ##
-func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE, color: Color = current_color) -> void:
+func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE, color: Color = default_color) -> void:
 	if ! check_normalization(normal): return
 
 	var basis = basis_from_normal(normal)
@@ -383,7 +353,7 @@ func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE
 
 
 ## Shortcut function to draw an upright cube with no rotation.
-func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE, color: Color = current_color) -> void:
+func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE, color: Color = default_color) -> void:
 	var basis := Basis.IDENTITY.scaled(size)
 	cube(position, basis, color)
 
@@ -396,18 +366,18 @@ func scale_basis(scale: float) -> Basis:
 
 
 ## Shortcut function to draw a circle lying on the XZ plane.
-func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void:
+func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = default_color) -> void:
 	var orientation = scale_basis(radius)
 	circle(center, orientation, color)
 
 
 ## Shortcut function to draw a circle lying on the XY plane.
-func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = current_color) -> void:
+func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = default_color) -> void:
 	var orientation = scale_basis(radius)
 	orientation = orientation.rotated(Vector3.RIGHT, TAU/4)
 	circle(center, orientation, color)
 
 
 ## Shortcut function to draw an arc in the XY plane.
-func arc_XY(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = current_color):
+func arc_XY(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = default_color):
 	arc(center, scale_basis(radius), angle_from, angle_to, draw_origin, color)

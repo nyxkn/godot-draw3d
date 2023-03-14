@@ -4,8 +4,9 @@ extends Node3D
 
 func _ready() -> void:
 	var primitives = $Primitives
-	primitives.points(random_vertices(20, Vector3(4, 0, 0)), Color.GREEN)
-	primitives.line_colored(random_colored_vertices())
+#	primitives.points(random_vertices(20, Vector3(4, 0, 0)), Color.GREEN)
+	primitives.points(random_colored_vertices(20, Vector3(4, 0, 0)))
+	primitives.line(random_colored_vertices())
 
 	# single static draw per Draw3D instance
 	# draw once then transform later
@@ -51,13 +52,14 @@ func random_vertices(n: int = 20, offset: Vector3 = Vector3.ZERO) -> Array:
 
 
 # generate a random set of colored vertices, for use with the *_colored functions
-func random_colored_vertices(n: int = 10) -> Array:
+func random_colored_vertices(n: int = 20, offset: Vector3 = Vector3.ZERO) -> Array:
 	var vertices = []
 	for i in n:
 		var colored_vertex = []
 		colored_vertex.resize(2)
 		colored_vertex[0] = Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
 		colored_vertex[0] *= 1.5
-		colored_vertex[1] = $Primitives.random_color()
+		colored_vertex[0] += offset
+		colored_vertex[1] = Draw3D.random_color()
 		vertices.push_back(colored_vertex)
 	return vertices
