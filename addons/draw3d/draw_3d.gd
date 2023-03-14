@@ -165,8 +165,9 @@ func line(vertices: Array, color: Color = current_color) -> void:
 ## I.e. the last point connects back to the first.
 ## Vertices are supplied as an Array of Vector3 coordinates.
 func line_loop(vertices: Array, color: Color = current_color) -> void:
-	print("unimplemented")
 #	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
+	vertices.push_back(vertices[0])
+	line(vertices, color)
 
 
 ################################
@@ -195,7 +196,6 @@ func line_colored(colored_vertices: Array) -> void:
 	draw_primitive_colored(Mesh.PRIMITIVE_LINE_STRIP, colored_vertices)
 
 
-
 ################################
 # CIRCLE
 
@@ -218,8 +218,7 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 		angle_vector = transform * angle_vector
 		circle.append(angle_vector)
 
-#	line_loop(circle, color)
-	line(circle, color)
+	line_loop(circle, color)
 
 	# also draw the points inbetween segments
 #	points(circle, color)
@@ -275,8 +274,7 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 		arc = PackedVector3Array()
 		arc.push_back(transform * Vector3.ZERO)
 		arc.append_array(get_arc(angle_from, angle_to, transform))
-#		line_loop(arc, color)
-		line(arc, color)
+		line_loop(arc, color)
 	else:
 		arc = get_arc(angle_from, angle_to, transform)
 		line(arc, color)
@@ -300,10 +298,8 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 	for i in vertices.size():
 		vertices[i] = transform * vertices[i]
 
-#	line_loop(vertices.slice(0, 3), color)
-	line(vertices.slice(0, 3), color)
-#	line_loop(vertices.slice(4, 7), color)
-	line(vertices.slice(4, 7), color)
+	line_loop(vertices.slice(0, 4), color)
+	line_loop(vertices.slice(4, 8), color)
 	for i in 4:
 		line([vertices[i], vertices[i+4]], color)
 

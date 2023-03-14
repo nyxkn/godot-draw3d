@@ -7,19 +7,21 @@ func _ready() -> void:
 	primitives.points(random_vertices(20, Vector3(4, 0, 0)), Color.GREEN)
 	primitives.line_colored(random_colored_vertices())
 
-	# single draw per Draw3D instance. easily transformable
+	# single static draw per Draw3D instance
+	# draw once then transform later
 #	$Sphere.sphere(2.0, Color.CYAN)
 	$TransformMe.circle_XY()
-#	$TransformMe.points([Vector3.ZERO])
 
 
 func _process(delta: float) -> void:
 	var time = Time.get_ticks_msec() * 0.001
 
+	# transformations of the static meshes
 	$TransformMe.rotate_x(delta)
 	$TransformMe.position.x = 9 + cos(time)
-	$Sphere.rotate_y(delta)
+#	$Sphere.rotate_y(delta)
 
+	# the following meshes are instead redrawn every frame
 	var arcs = $Arcs
 	arcs.clear()
 	arcs.circle(Vector3(0, 0, 0), Basis.from_euler(Vector3(1, time, 0)), Color.PURPLE)
@@ -48,6 +50,7 @@ func random_vertices(n: int = 20, offset: Vector3 = Vector3.ZERO) -> Array:
 	return vertices
 
 
+# generate a random set of colored vertices, for use with the *_colored functions
 func random_colored_vertices(n: int = 10) -> Array:
 	var vertices = []
 	for i in n:
