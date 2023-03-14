@@ -4,40 +4,27 @@ class_name Draw3D
 extends MeshInstance3D
 
 ##
-## A small library for drawing simple shapes in 3D.
+## A small library for drawing simple wireframe shapes in 3D.
 ##
-## Usage is similar to the custom drawing in 2D that is already present in Godot:
+## Usage is similar to Godot's
+## [url=https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html]
+## custom drawing in 2d[/url] functions.
 ##
-## https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html
+## @tutorial: https://github.com/nyxkn/godot-draw3d/tree/main#usage
 ##
 
-# https://www.khronos.org/opengl/wiki/Primitive
-const CUBE_VERTICES := [
-	# front 4 vertices
-	Vector3( -1, -1, 1 ),
-	Vector3( 1, -1, 1 ),
-	Vector3( 1, 1, 1 ),
-	Vector3( -1, 1, 1 ),
-	# back 4 vertices
-	Vector3( -1, -1, -1 ),
-	Vector3( 1, -1, -1 ),
-	Vector3( 1, 1, -1 ),
-	Vector3( -1, 1, -1 ),
-]
-
+## Size in pixels of drawn points
 const MATERIAL_POINT_SIZE: int = 8
 
-## Number of segments that will be used to draw a circle.
-##
-## Also applies for the resolution of arcs.
-##
+## Resolution is the number of segments that will be used to draw a full circle.
+## This also affects the resolution of semicircles and arcs.
 @export var circle_resolution: int = 32
 
+## Whether to also draw the vertices as points, in addition to lines.
 @export var draw_vertex_points: bool = false
 
 ## This holds the default color value to use.
-## It will be overridden by the specific draw functions *color* parameter.
-##
+## It will be overridden by the specific draw functions [i]color[/i] parameter.
 @export var default_color: Color = Color.WHITE
 
 
@@ -48,7 +35,7 @@ var _default_points_material: StandardMaterial3D
 func _ready() -> void:
 	mesh = ImmediateMesh.new()
 	_setup_materials()
-	
+
 
 func _setup_materials() -> void:
 	# here we are setting the material to material_override
@@ -59,8 +46,8 @@ func _setup_materials() -> void:
 	# but the usefulness of this seems limited since we're drawing wireframe things anyway
 	# and not many material parameters apply to these
 	# plus it's easy to just make a new meshinstance instead if you need different material
-	# we support this at least in draw_primitive because why not
-	
+	# we support this at least in _draw_primitive because why not
+
 	_default_material = StandardMaterial3D.new()
 	_default_material.vertex_color_use_as_albedo = true
 	_default_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -79,10 +66,13 @@ static func random_color() -> Color:
 	return Color(randf_range(0, 1), randf_range(0, 1), randf_range(0, 1))
 
 
+## Clear all drawn content.
+# If you are redrawing shapes every frame in _process(),
+## you must call this at the beginning of the frame.
 func clear() -> void:
 	mesh.clear_surfaces()
-	
-	
+
+
 func _points_test(clear: bool = false) -> void:
 	if clear: clear()
 
@@ -103,16 +93,25 @@ func _line_test(clear: bool = false) -> void:
 	mesh.surface_end()
 
 
-################################
+################################################################################
 # draw_primitive
 
-func draw_primitive(
-	primitive_type: int,
-	vertices: Array,
-	color: Color = default_color,
-	custom_material: BaseMaterial3D = null
-	) -> void:
-	
+## Draws a surface.
+##
+## [br][br][code]primitive_type[/code] is [enum Mesh.PrimitiveType].
+##
+## [br][br][code]vertices[/code] are supplied as an Array of Vector3 point coordinates.
+## Or alternatively, as an Array of [i]colored vertices[/i],
+## where a [i]colored vertex[/i] is an Array with two values, a vertex and a color:
+## [code][vertex: Vector3, color: Color][/code].
+## This allows you to have per-vertex coloring.
+##
+func _draw_primitive(
+		primitive_type: int,
+		vertices: Array,
+		color: Color = default_color,
+		custom_material: BaseMaterial3D = null) -> void:
+
 	if vertices[0] is Vector3:
 		# we're dealing with a list of vertices
 		mesh.surface_begin(primitive_type, null)
@@ -127,8 +126,8 @@ func draw_primitive(
 		for i in vertices.size():
 			mesh.surface_set_color(vertices[i][1])
 			mesh.surface_add_vertex(vertices[i][0])
-		mesh.surface_end()		
-	
+		mesh.surface_end()
+
 	var material
 	if custom_material:
 		material = custom_material
@@ -136,40 +135,49 @@ func draw_primitive(
 		material = _default_points_material
 	else:
 		material = _default_material
-		
+
 	var last_surface_idx = mesh.get_surface_count() - 1
 	mesh.surface_set_material(last_surface_idx, material)
 
 
-################################
+################################################################################
 # draw_primitive shortcuts
 
 ## Draw points at the given vertices.
-## Vertices are supplied as an Array of Vector3 coordinates.
-func points(vertices: Array, color: Color = default_color) -> void:
-	draw_primitive(Mesh.PRIMITIVE_POINTS, vertices, color)
+##
+## [br][br]Vertices are supplied as an Array of Vector3 coordinates or as [i]colored vertices[/i].
+## See [method _draw_primitive] for details.
+##
+func draw_points(vertices: Array, color: Color = default_color) -> void:
+	_draw_primitive(Mesh.PRIMITIVE_POINTS, vertices, color)
 
 
 ## Draw line segments between the given vertices.
-## Vertices are supplied as an Array of Vector3 coordinates.
-func line(vertices: Array, color: Color = default_color) -> void:
-	draw_primitive(Mesh.PRIMITIVE_LINE_STRIP, vertices, color)
-	
+##
+## [br][br]Vertices are supplied as an Array of Vector3 coordinates or as [i]colored vertices[/i].
+## See [method _draw_primitive] for details.
+##
+func draw_line(vertices: Array, color: Color = default_color) -> void:
+	_draw_primitive(Mesh.PRIMITIVE_LINE_STRIP, vertices, color)
+
 	if draw_vertex_points:
-		points(vertices, color)
+		draw_points(vertices, color)
 
 
 ## Draw looping line segments between the given vertices.
 ## I.e. the last point connects back to the first.
-## Vertices are supplied as an Array of Vector3 coordinates.
-func line_loop(vertices: Array, color: Color = default_color) -> void:
-#	draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
+##
+## [br][br]Vertices are supplied as an Array of Vector3 coordinates or as [i]colored vertices[/i].
+## See [method _draw_primitive] for details.
+##
+func draw_line_loop(vertices: Array, color: Color = default_color) -> void:
+#	_draw_primitive(Mesh.PRIMITIVE_LINE_LOOP, vertices, color)
 	var looped_vertices = vertices.duplicate()
 	looped_vertices.push_back(vertices[0])
-	line(looped_vertices, color)
-	
+	draw_line(looped_vertices, color)
+
 	if draw_vertex_points:
-		points(vertices, color)
+		draw_points(vertices, color)
 
 
 ################################
@@ -177,10 +185,11 @@ func line_loop(vertices: Array, color: Color = default_color) -> void:
 
 ## Generic function to draw a circle.
 ##
-## Pass a Basis argument to define orientation.
+## [br][br]Pass a Basis parameter to define orientation.
 ## Otherwise defaults to lying on the XZ plane.
 ##
-func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = default_color) -> void:
+func circle(position: Vector3 = Vector3.ZERO,
+		basis: Basis = Basis.IDENTITY, color: Color = default_color) -> void:
 	# by default, this is a circle on the XZ plane.
 	# this seems to make most sense in 3d as a highlight of objects
 
@@ -194,13 +203,14 @@ func circle(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, col
 		angle_vector = transform * angle_vector
 		circle.append(angle_vector)
 
-	line_loop(circle, color)
+	draw_line_loop(circle, color)
 
 
 ###############################
 # ARC
 
-func get_arc(angle_from: float, angle_to: float, transform: Transform3D = Transform3D.IDENTITY) -> PackedVector3Array:
+func _compute_arc(angle_from: float, angle_to: float,
+		transform: Transform3D = Transform3D.IDENTITY) -> PackedVector3Array:
 	# angles in radians, obviously
 
 	var arc2 = PackedVector2Array()
@@ -232,25 +242,27 @@ func get_arc(angle_from: float, angle_to: float, transform: Transform3D = Transf
 
 ## Generic function to draw an arc.
 ##
-## Pass a Basis argument to define orientation.
+## [br][br]Pass a Basis parameter to define orientation.
 ##
-## Angle_from and Angle_to are in radians.
+## [br][br][code]angle_from[/code] and [code]angle_to[/code] are in radians.
 ##
-## Optionally also draw the origin point and connect it with two lines on each end
-## (a circular sector).
+## [br][br]If [code]draw_origin[/code] is true, also draw the origin point
+## and connect it with two lines on each end (a circular sector).
 ##
-func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, draw_origin: bool = false, color: Color = default_color):
+func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float,
+		draw_origin: bool = false, color: Color = default_color) -> void:
+
 	var arc: PackedVector3Array
 	var transform = Transform3D(basis, position)
 
 	if draw_origin:
 		arc = PackedVector3Array()
 		arc.push_back(transform * Vector3.ZERO)
-		arc.append_array(get_arc(angle_from, angle_to, transform))
-		line_loop(arc, color)
+		arc.append_array(_compute_arc(angle_from, angle_to, transform))
+		draw_line_loop(arc, color)
 	else:
-		arc = get_arc(angle_from, angle_to, transform)
-		line(arc, color)
+		arc = _compute_arc(angle_from, angle_to, transform)
+		draw_line(arc, color)
 
 
 ################################
@@ -258,20 +270,35 @@ func arc(position: Vector3, basis: Basis, angle_from: float, angle_to: float, dr
 
 ## Generic function to draw a cube.
 ##
-## Pass a Basis argument to define orientation.
+## [br][br]Pass a Basis parameter to define orientation.
 ## Otherwise defaults to no orientation.
 ##
-func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color: Color = default_color) -> void:
-	var vertices = CUBE_VERTICES.duplicate()
+func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY,
+		color: Color = default_color) -> void:
+
+	# https://www.khronos.org/opengl/wiki/Primitive
+	var vertices := [
+		# front 4 vertices
+		Vector3( -1, -1, 1 ),
+		Vector3( 1, -1, 1 ),
+		Vector3( 1, 1, 1 ),
+		Vector3( -1, 1, 1 ),
+		# back 4 vertices
+		Vector3( -1, -1, -1 ),
+		Vector3( 1, -1, -1 ),
+		Vector3( 1, 1, -1 ),
+		Vector3( -1, 1, -1 ),
+	]
+
 	var transform = Transform3D(basis, position)
 
 	for i in vertices.size():
 		vertices[i] = transform * vertices[i]
 
-	line_loop(vertices.slice(0, 4), color)
-	line_loop(vertices.slice(4, 8), color)
+	draw_line_loop(vertices.slice(0, 4), color)
+	draw_line_loop(vertices.slice(4, 8), color)
 	for i in 4:
-		line([vertices[i], vertices[i+4]], color)
+		draw_line([vertices[i], vertices[i+4]], color)
 
 
 ################################
@@ -284,8 +311,8 @@ func cube(position: Vector3 = Vector3.ZERO, basis: Basis = Basis.IDENTITY, color
 ## It's best to draw the sphere on a dedicated Draw3D node so you can manipulate it by adjusting the
 ## transform properties.
 ##
-func sphere(radius: float = 1.0, color: Color = default_color, lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
-	print("unimplemented")
+#func sphere(radius: float = 1.0, color: Color = default_color,
+#		lats: int = 16, lons: int = 16, add_uv: bool = true) -> void:
 #	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, null)
 #	mesh.surface_set_color(color)
 #	add_sphere(lats, lons, radius, add_uv)
@@ -295,7 +322,7 @@ func sphere(radius: float = 1.0, color: Color = default_color, lats: int = 16, l
 ################################
 # SHORTCUTS - from normal
 
-func basis_from_normal(normal: Vector3) -> Basis:
+func _basis_from_normal(normal: Vector3) -> Basis:
 	# technically don't need to normalize again since we're already checking. but just in case.
 	var Y = normal.normalized()
 	var X = Vector3(Y.y, -Y.x, 0)
@@ -306,7 +333,7 @@ func basis_from_normal(normal: Vector3) -> Basis:
 	return Basis(X, Y, Z)
 
 
-func check_normalization(normal: Vector3) -> bool:
+func _ensure_normalized(normal: Vector3) -> bool:
 	# the normal should be normalized
 	# we could normalize silently but it's good to double check with the user -
 	# to make sure that they're sending the right data
@@ -316,44 +343,53 @@ func check_normalization(normal: Vector3) -> bool:
 
 	return true
 
+
 ## Shortcut function to draw a circle whose plane is defined by a normal.
 ##
-## The normal should be normalized.
+## [br][br][code]normal[/code] should be normalized.
 ##
-func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0, color: Color = default_color) -> void:
-	if ! check_normalization(normal): return
+func circle_normal(position: Vector3, normal: Vector3, radius: float = 1.0,
+		color: Color = default_color) -> void:
 
-	var basis = basis_from_normal(normal)
+	if ! _ensure_normalized(normal): return
+
+	var basis = _basis_from_normal(normal)
 	basis = basis.scaled(Vector3(radius, radius, radius))
 	circle(position, basis, color)
 
 
 ## Shortcut function to draw an arc whose plane is defined by a normal.
 ##
-## The normal should be normalized.
+## [br][br][code]normal[/code] should be normalized.
 ##
-func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin: bool = false, color: Color = default_color) -> void:
-	if ! check_normalization(normal): return
+func arc_normal(position: Vector3, normal: Vector3, angle_from: float, angle_to: float,
+		radius: float = 1.0, draw_origin: bool = false, color: Color = default_color) -> void:
 
-	var basis = basis_from_normal(normal)
+	if ! _ensure_normalized(normal): return
+
+	var basis = _basis_from_normal(normal)
 	basis = basis.scaled(Vector3(radius, radius, radius))
 	arc(position, basis, angle_from, angle_to, draw_origin, color)
 
 
 ## Shortcut function to draw a cube whose orientation is defined by a normal.
 ##
-## The normal should be normalized.
+## [br][br][code]normal[/code] should be normalized.
 ##
-func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE, color: Color = default_color) -> void:
-	if ! check_normalization(normal): return
+func cube_normal(position: Vector3, normal: Vector3, size: Vector3 = Vector3.ONE,
+		color: Color = default_color) -> void:
 
-	var basis = basis_from_normal(normal)
+	if ! _ensure_normalized(normal): return
+
+	var basis = _basis_from_normal(normal)
 	basis = basis.scaled(size)
 	cube(position, basis, color)
 
 
 ## Shortcut function to draw an upright cube with no rotation.
-func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE, color: Color = default_color) -> void:
+func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE,
+		color: Color = default_color) -> void:
+
 	var basis := Basis.IDENTITY.scaled(size)
 	cube(position, basis, color)
 
@@ -361,23 +397,29 @@ func cube_up(position: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE, colo
 ################################
 # SHORTCUTS - 2d drawing
 
-func scale_basis(scale: float) -> Basis:
+func _scale_basis(scale: float) -> Basis:
 	return Basis.IDENTITY.scaled(Vector3(scale, scale, scale))
 
 
 ## Shortcut function to draw a circle lying on the XZ plane.
-func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = default_color) -> void:
-	var orientation = scale_basis(radius)
+func circle_XZ(center: Vector3 = Vector3.ZERO, radius: float = 1.0,
+		color: Color = default_color) -> void:
+
+	var orientation = _scale_basis(radius)
 	circle(center, orientation, color)
 
 
 ## Shortcut function to draw a circle lying on the XY plane.
-func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0, color: Color = default_color) -> void:
-	var orientation = scale_basis(radius)
+func circle_XY(center: Vector3 = Vector3.ZERO, radius: float = 1.0,
+		color: Color = default_color) -> void:
+
+	var orientation = _scale_basis(radius)
 	orientation = orientation.rotated(Vector3.RIGHT, TAU/4)
 	circle(center, orientation, color)
 
 
 ## Shortcut function to draw an arc in the XY plane.
-func arc_XY(center: Vector3, angle_from: float, angle_to: float, radius: float = 1.0, draw_origin = false, color: Color = default_color):
-	arc(center, scale_basis(radius), angle_from, angle_to, draw_origin, color)
+func arc_XY(center: Vector3, angle_from: float, angle_to: float,
+		radius: float = 1.0, draw_origin = false, color: Color = default_color):
+
+	arc(center, _scale_basis(radius), angle_from, angle_to, draw_origin, color)
