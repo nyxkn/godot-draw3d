@@ -38,22 +38,6 @@ add_child(draw)
 draw.cube()
 ```
 
-## Donations
-
-If you find this project helpful and you feel like it, throw me some coins!
-
-And drop a [star](stargazers) on this repo :)
-
-[![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/nyxkn)
-
-[![Liberapay](https://img.shields.io/badge/donate-liberapay-F6C915?style=for-the-badge&logo=liberapay&logoColor=black)](https://liberapay.com/nyxkn)
-
-[![Support me on ko-fi](https://img.shields.io/badge/support%20me%20on%20ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=black)](https://ko-fi.com/nyxkn)
-
-[![Paypal](https://img.shields.io/badge/donate-paypal-00457C?style=for-the-badge&logo=paypal&logoColor=black)](https://paypal.me/nicolasiagri)
-
-Bitcoin: bc1qfu5gk78898zdcxw372unmwua0yd5luf3z60sgq
-
 ## Usage
 
 Add the Draw3D node to your scene and then call any of the draw or shape functions.
@@ -175,6 +159,22 @@ to see an example usage of some of the shape functions.
 You can find the generated documentation from within the Help dialog in Godot.
 Just search for Draw3D.
 
+## Donations
+
+If you find this project helpful and you feel like it, throw me some coins!
+
+And drop a [star](stargazers) on this repo :)
+
+[![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/nyxkn)
+
+[![Liberapay](https://img.shields.io/badge/donate-liberapay-F6C915?style=for-the-badge&logo=liberapay&logoColor=black)](https://liberapay.com/nyxkn)
+
+[![Support me on ko-fi](https://img.shields.io/badge/support%20me%20on%20ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=black)](https://ko-fi.com/nyxkn)
+
+[![Paypal](https://img.shields.io/badge/donate-paypal-00457C?style=for-the-badge&logo=paypal&logoColor=black)](https://paypal.me/nicolasiagri)
+
+Bitcoin: bc1qfu5gk78898zdcxw372unmwua0yd5luf3z60sgq
+
 ## Credits
 
 Inspired by [this short script](https://github.com/Zireael07/FreeRoamRoguelikeRacerPrototype/blob/master/game/scripts/draw_line.gd) by [Zireael07](https://github.com/Zireael07).
@@ -187,3 +187,4 @@ A few similar projects:
 ## License
 
 This project is licensed under the terms of the [MIT license](https://spdx.org/licenses/MIT.html).
+
