@@ -2,7 +2,7 @@
 
 A small library for drawing simple wireframe shapes in 3D.
 
-***Updated for Godot4***. For the 3.x version see the
+***Updated for Godot 4***. For the Godot 3.x version see the
 [godot3 branch](https://github.com/nyxkn/godot-draw3d/tree/godot3).
 
 <img height=64 src="icon.png"><img>
