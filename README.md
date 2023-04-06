@@ -1,11 +1,25 @@
 # Draw3D
 
+<img height=64 src="icon.png"><img>
+
 A small library for drawing simple wireframe shapes in 3D.
 
-***Updated for Godot 4***. For the Godot 3.x version see the
+> ***Updated for Godot 4***. For the Godot 3.x version see the
 [godot3 branch](https://github.com/nyxkn/godot-draw3d/tree/godot3).
 
-<img height=64 src="icon.png"><img>
+## Draw3D
+
+[![Asset Library](
+https://img.shields.io/badge/godot4-asset%20library-478CBF?logo=godotengine&style=for-the-badge
+)](
+https://godotengine.org/asset-library/asset/1741
+)
+
+[![Asset Library](
+https://img.shields.io/badge/godot3-asset%20library-478CBF?logo=godotengine&style=for-the-badge
+)](
+https://godotengine.org/asset-library/asset/1301
+)
 
 This library provides a custom `Draw3D` node that you can add to your scenes,
 with which you can draw simple geometry like lines, arcs, circles, and cubes.
@@ -24,7 +38,9 @@ to see all the available methods and how to call them.
 
 ## Installation
 
-Simply grab `Draw3D.gd` and place it somewhere in your project.
+You can download this project from Godot's asset library or by cloning this repository.
+
+Then simply grab `Draw3D.gd` and place it somewhere in your project.
 
 This script provides a custom node called `Draw3D`, which you can then add to your scene
 from the `Add Child Node` menu in the editor.
@@ -167,11 +183,11 @@ And drop a [star](stargazers) on this repo :)
 
 [![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/nyxkn)
 
-[![Liberapay](https://img.shields.io/badge/donate-liberapay-F6C915?style=for-the-badge&logo=liberapay&logoColor=black)](https://liberapay.com/nyxkn)
+[![Liberapay](https://img.shields.io/badge/donate-liberapay-F6C915?style=for-the-badge&logo=liberapay&logoColor=)](https://liberapay.com/nyxkn)
 
 [![Support me on ko-fi](https://img.shields.io/badge/support%20me%20on%20ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=black)](https://ko-fi.com/nyxkn)
 
-[![Paypal](https://img.shields.io/badge/donate-paypal-00457C?style=for-the-badge&logo=paypal&logoColor=black)](https://paypal.me/nicolasiagri)
+[![Paypal](https://img.shields.io/badge/donate-paypal-00457C?style=for-the-badge&logo=paypal&logoColor=)](https://paypal.me/nicolasiagri)
 
 Bitcoin: bc1qfu5gk78898zdcxw372unmwua0yd5luf3z60sgq
 
