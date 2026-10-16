@@ -24,7 +24,7 @@ mesh = SubResource("ImmediateMesh_yvnyu")
 script = ExtResource("2")
 
 [node name="TransformMe" type="MeshInstance3D" parent="." unique_id=1877715069]
-transform = Transform3D(0.999689, 0, 0, 0, 0.8135722, -0.52560395, 0, 0.52573824, 0.81338114, 8.000961, 0, 0)
+transform = Transform3D(0.999689, 0, 0, 0, -0.58460057, -0.77198565, 0, 0.7721636, -0.58444756, 9.134135, 0, 0)
 mesh = SubResource("ImmediateMesh_s7nhu")
 script = ExtResource("2")
 
