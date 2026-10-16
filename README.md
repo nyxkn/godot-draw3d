@@ -1,10 +1,10 @@
 # Draw3D
 
-<img height=64 src="icon.png"><img>
+<img height=64 src="https://raw.github.com/nyxkn/godot-draw3d/main/icon.png"><img>
 
 A small library for drawing simple wireframe shapes in 3D.
 
-> ***Updated for Godot 4***. For the Godot 3.x version see the
+> For the old Godot 3.x version see the
 [godot3 branch](https://github.com/nyxkn/godot-draw3d/tree/godot3).
 
 ## Draw3D
@@ -30,11 +30,10 @@ Mainly used for debugging, or visualizing prototypes.
 Usage is similar to the [custom drawing in 2D](https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html)
 that is already present in Godot, and for consistency I tried to keep
 the parameters in the same order as the 2D draw calls whenever possible.
-   
-Have a look at the [documentation](docs/addons/draw3d/Draw3D.md)
-to see all the available methods and how to call them.
 
-<a href="media/screenshot-1.png?raw=true"><img width=900 src="media/screenshot-1.png"></a>
+To see all the available methods and how to call them, you can open the Help dialog in Godot and search for Draw3D.
+
+<a href="https://raw.github.com/nyxkn/godot-draw3d/main/media/screenshot-1.png?raw=true"><img width=900 src="media/screenshot-1.png"></a>
 
 ## Installation
 
@@ -143,8 +142,6 @@ Then there are a few generic draw calls for basic shapes:
 
 These all take a Basis parameter to define orientation and scale. See [above](#using-draw3d-as-a-canvas).
 
-<!-- See the [docs](docs/addons/draw3d/Draw3D.md) for more details on how to use all the functions. -->
-
 #### Shortcut functions
 
 Some shortcut functions are then provided for quickly drawing shapes with predefined orientation,
@@ -167,7 +164,7 @@ And from a normal:
 
 You can check out the provided Example scene to see a few working examples.
 
-Or have a quick look at [draw_3d_example.gd](draw_3d_example.gd)
+Or have a quick look at [draw_3d_example.gd](https://github.com/nyxkn/godot-draw3d/blob/main/draw_3d_example.gd)
 to see an example usage of some of the shape functions.
 
 ## Documentation
@@ -179,7 +176,7 @@ Just search for Draw3D.
 
 If you find this project helpful and you feel like it, throw me some coins!
 
-And drop a [star](stargazers) on this repo :)
+And drop a [star](https://github.com/nyxkn/godot-draw3d/stargazers) on this repo :)
 
 [![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/nyxkn)
 
