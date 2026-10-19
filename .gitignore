@@ -17,3 +17,6 @@ mono_crash.*.json
 # temp files
 *~
 README.md.tmp
+
+# project excludes
+/dist/

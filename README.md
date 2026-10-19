@@ -1,6 +1,6 @@
 # Draw3D
 
-<img height=64 src="https://raw.github.com/nyxkn/godot-draw3d/main/icon.png"><img>
+<img height=64 src="https://raw.githubusercontent.com/nyxkn/godot-draw3d/main/icon.png"><img>
 
 A small library for drawing simple wireframe shapes in 3D.
 
@@ -33,11 +33,13 @@ the parameters in the same order as the 2D draw calls whenever possible.
 
 To see all the available methods and how to call them, you can open the Help dialog in Godot and search for Draw3D.
 
-<a href="https://raw.github.com/nyxkn/godot-draw3d/main/media/screenshot-1.png?raw=true"><img width=900 src="media/screenshot-1.png"></a>
+<a href="https://github.com/nyxkn/godot-draw3d/blob/main/media/screenshot-1.png">
+  <img width="900" src="https://raw.githubusercontent.com/nyxkn/godot-draw3d/main/media/screenshot-1.png">
+</a>
 
 ## Installation
 
-You can download this project from Godot's asset library or by cloning this repository.
+You can download this project from Godot's Asset Library or by cloning this repository.
 
 Then simply grab `Draw3D.gd` and place it somewhere in your project.
 
